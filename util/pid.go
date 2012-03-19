@@ -9,7 +9,7 @@ type PidFile string
 
 func NewPidFile(path string) (pf PidFile, err error) {
     pf = PidFile(path)
-    f, err := os.OpenFile(pf.String(), os.O_CREATE | os.O_WRONLY, 0600)
+    f, err := os.OpenFile(pf.String(), os.O_CREATE | os.O_EXCL | os.O_WRONLY, 0600)
     if err != nil {
         return
     }

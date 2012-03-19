@@ -14,46 +14,55 @@ const (
     LogNone = 0
 )
 
-type Log struct {
+var (
+    Log *logger
+)
+
+func InitLog(file string, flag int) (err error) {
+    Log, err = newLog(file, flag)
+    return
+}
+
+type logger struct {
     *log.Logger
     flag int
 }
 
-func NewLog(file string, flag int) (l *Log, err error){
+func newLog(file string, flag int) (l *logger, err error){
     if file != "" {
         f, err := os.OpenFile(file, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0600)
         if err == nil {
-            l = &Log{log.New(f, "", log.LstdFlags), flag}
+            l = &logger{log.New(f, "", log.LstdFlags), flag}
         }
     }
     if l == nil {
-        l = &Log{log.New(os.Stdout, "", log.LstdFlags), flag}
+        l = &logger{log.New(os.Stdout, "", log.LstdFlags), flag}
     }
     return l, err
 }
 
-func (l *Log) Error(err error) {
+func (l *logger) Error(err error) {
     if l.flag ^ DisableError == 0 {
         return
     }
     l.Printf("[ERR] %s", err.Error())
 }
 
-func (l *Log) Warning(msg string) {
+func (l *logger) Warning(msg string) {
     if l.flag & DisableWarning == 0 {
         return
     }
     l.Printf("[WRN] %s", msg)
 }
 
-func (l *Log) Message(msg string) {
+func (l *logger) Message(msg string) {
     if l.flag & DisableMessage == 0 {
         return
     }
     l.Printf("[MSG] %s", msg)
 }
 
-func (l *Log) Debug(msg string) {
+func (l *logger) Debug(msg string) {
     if l.flag & DisableDebug == 0 {
         return
     }

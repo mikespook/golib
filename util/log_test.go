@@ -3,6 +3,7 @@ package util
 import (
     "errors"
     "testing"
+    "os"
 )
 
 func TestFlag(t *testing.T) {
@@ -13,26 +14,28 @@ func TestFlag(t *testing.T) {
 }
 
 func TestNewLog(t *testing.T) {
+    defer os.Remove("testing.log")
     var err error
 
-    _, err = NewLog("", LogAll)
+    _, err = newLog("", LogAll)
     if err != nil {
         t.Error(err)
     }
 
-    _, err = NewLog("testing.log", LogAll)
+    _, err = newLog("testing.log", LogAll)
     if err != nil {
         t.Error(err)
     }
 
-    _, err = NewLog("foobar/testing.log", LogAll)
+    _, err = newLog("foobar/testing.log", LogAll)
     if err != nil {
         t.Log(err)
     }
 }
 
 func TestLog(t *testing.T) {
-    l, err := NewLog("testing.log", LogAll)
+    defer os.Remove("testing.log")
+    l, err := newLog("testing.log", LogAll)
 
     if err != nil {
         t.Error(err)
@@ -45,7 +48,8 @@ func TestLog(t *testing.T) {
 }
 
 func TestDisableLog(t *testing.T) {
-    l, err := NewLog("testing.log", LogAll ^ DisableDebug ^ DisableWarning)
+    defer os.Remove("testing.log")
+    l, err := newLog("testing.log", LogAll ^ DisableDebug ^ DisableWarning)
     if err != nil {
         t.Error(err)
     }
