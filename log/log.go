@@ -1,4 +1,4 @@
-package util
+package log
 
 import (
     "os"
@@ -10,15 +10,15 @@ const (
     DisableWarning = 2
     DisableMessage = 4
     DisableDebug = 8
-    LogAll = 0xF
-    LogNone = 0
+    All = 0xF
+    None = 0
 )
 
 var (
     l *logger
 )
 
-func InitLog(file string, flag int) (err error) {
+func Init(file string, flag int) (err error) {
     l, err = newLog(file, flag)
     return
 }
