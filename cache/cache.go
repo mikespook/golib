@@ -15,15 +15,14 @@ type cachetable map[string]*object
 
 var (
     cache cachetable
-    ErrTimeOut error
-    ErrKeyNotFound error
+    ErrTimeOut error = errors.New("The cache has been timeout.")
+    ErrKeyNotFound error = errors.New("The key was not found.")
+    ErrTypeAssertion error = errors.New("Type assertion error.")
 )
 
 func init() {
     cache = make(cachetable, 1000)
     go gc()
-    ErrTimeOut = errors.New("The cache has been timeout.")
-    ErrKeyNotFound = errors.New("The key was not found.")
 }
 
 func gc() {
