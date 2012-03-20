@@ -15,11 +15,11 @@ const (
 )
 
 var (
-    Log *logger
+    l *logger
 )
 
 func InitLog(file string, flag int) (err error) {
-    Log, err = newLog(file, flag)
+    l, err = newLog(file, flag)
     return
 }
 
@@ -41,28 +41,28 @@ func newLog(file string, flag int) (l *logger, err error){
     return l, err
 }
 
-func (l *logger) Error(err error) {
+func Error(err error) {
     if l.flag ^ DisableError == 0 {
         return
     }
     l.Printf("[ERR] %s", err.Error())
 }
 
-func (l *logger) Warning(msg string) {
+func Warning(msg string) {
     if l.flag & DisableWarning == 0 {
         return
     }
     l.Printf("[WRN] %s", msg)
 }
 
-func (l *logger) Message(msg string) {
+func Message(msg string) {
     if l.flag & DisableMessage == 0 {
         return
     }
     l.Printf("[MSG] %s", msg)
 }
 
-func (l *logger) Debug(msg string) {
+func Debug(msg string) {
     if l.flag & DisableDebug == 0 {
         return
     }
