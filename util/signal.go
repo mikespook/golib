@@ -10,28 +10,26 @@ type SignalCallback func() bool
 
 type SignalHandler struct {
     schan chan os.Signal
-    icb SignalCallback
-    kcb SignalCallback
+    cb map[os.Signal]SignalCallback
 }
 
-func NewSignalHandler(icb, kcb SignalCallback) (sh *SignalHandler) {
-    sh = &SignalHandler{make(chan os.Signal, 1), icb, kcb}
+func NewSignalHandler() (sh *SignalHandler) {
+    sh = &SignalHandler{make(chan os.Signal, 1), make(map[os.Signal]SignalCallback, 5)}
     signal.Notify(sh.schan, os.Interrupt, os.Kill)
     return
+}
+
+func (sh *SignalHandler)Bind(s os.Signal, cb SignalCallback) {
+    sh.cb[s] = cb
 }
 
 func (sh *SignalHandler)Loop() os.Signal {
     for {
         s := <-sh.schan
-        switch(s) {
-            case os.Interrupt:
-                if (sh.icb()) {
-                    return s
-                }
-            case os.Kill:
-                if (sh.kcb()) {
-                    return s
-                }
+        f, ok := sh.cb[s]
+        if ok {
+            f()
+            return s
         }
     }
     return nil

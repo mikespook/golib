@@ -18,7 +18,8 @@ func sendInterrupt(t *testing.T) {
 }
 
 func TestSignalHandler(t *testing.T) {
-    sh := NewSignalHandler(func() bool {return true}, func() bool {return false})
+    sh := NewSignalHandler()
+    sh.Bind(os.Interrupt, func() bool {return true})
     go sendInterrupt(t)
     s := sh.Loop()
     t.Log(s)
