@@ -1,4 +1,4 @@
-package util
+package signal
 
 import (
     "testing"
@@ -18,7 +18,7 @@ func sendInterrupt(t *testing.T) {
 }
 
 func TestSignalHandler(t *testing.T) {
-    sh := NewSignalHandler()
+    sh := NewHandler()
     sh.Bind(os.Interrupt, func() bool {return true})
     go sendInterrupt(t)
     s := sh.Loop()

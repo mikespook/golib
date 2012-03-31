@@ -1,11 +1,11 @@
-package util
+package prof
 
 import (
     "os"
     "runtime/pprof"
 )
 
-func StartProfile(fn string) (err error) {
+func Start(fn string) (err error) {
     f , err := os.Create(fn)
     if err != nil {
         return
@@ -14,7 +14,7 @@ func StartProfile(fn string) (err error) {
     return
 }
 
-func StopProfile() {
+func Stop() {
     pprof.StopCPUProfile()
 }
 

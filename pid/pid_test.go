@@ -1,4 +1,4 @@
-package util
+package pid
 
 import (
     "testing"
@@ -9,7 +9,7 @@ const (
 )
 
 func TestPidFile(t *testing.T) {
-    pf, err := NewPidFile(PIDFILE)
+    pf, err := New(PIDFILE)
     if err != nil {
         t.Error(err)
     }

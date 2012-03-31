@@ -1,4 +1,4 @@
-package util
+package pid
 
 import (
     "os"
@@ -7,7 +7,7 @@ import (
 
 type PidFile string
 
-func NewPidFile(path string) (pf PidFile, err error) {
+func New(path string) (pf PidFile, err error) {
     pf = PidFile(path)
     f, err := os.OpenFile(pf.String(), os.O_CREATE | os.O_EXCL | os.O_WRONLY, 0600)
     if err != nil {
