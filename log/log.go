@@ -10,8 +10,12 @@ const (
     DisableWarning = 2
     DisableMessage = 4
     DisableDebug = 8
-    All = 0xF
+    LogAll = 0xF
     None = 0
+    LogError = LogAll ^ DisableWarning ^ DisableMessage ^ DisableDebug
+    LogWarning = LogAll ^ DisableMessage ^ DisableDebug ^ DisableError
+    LogMessage = LogAll ^ DisableDebug ^ DisableError ^ DisableWarning
+    LogDebug = LogAll ^ DisableError ^ DisableWarning ^ DisableMessage
 )
 
 var (

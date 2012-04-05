@@ -35,28 +35,26 @@ func TestNewLog(t *testing.T) {
 
 func TestLog(t *testing.T) {
     defer os.Remove("testing.log")
-    l, err := newLog("testing.log", LogAll)
-
+    err := Init("testing.log", LogAll)
     if err != nil {
         t.Error(err)
     }
 
-    l.Error(errors.New("Test Error."))
-    l.Warning("Test Warning.")
-    l.Message("Test Message.")
-    l.Debug("Test Debug.")
+    Error(errors.New("Test Error."))
+    Warning("Test Warning.")
+    Message("Test Message.")
+    Debug("Test Debug.")
 }
 
 func TestDisableLog(t *testing.T) {
     defer os.Remove("testing.log")
-    l, err := newLog("testing.log", LogAll ^ DisableDebug ^ DisableWarning)
+    err := Init("testing.log", LogAll ^ DisableDebug ^ DisableWarning)
     if err != nil {
         t.Error(err)
     }
-    l.SetPrefix("{D}")
 
-    l.Error(errors.New("Test Error."))
-    l.Warning("Test Warning.")
-    l.Message("Test Message.")
-    l.Debug("Test Debug.")
+    Error(errors.New("Test Error."))
+    Warning("Test Warning.")
+    Message("Test Message.")
+    Debug("Test Debug.")
 }
