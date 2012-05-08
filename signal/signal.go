@@ -14,7 +14,7 @@ type Handler struct {
 }
 
 func NewHandler() (sh *Handler) {
-    sh = &Handler{make(chan os.Signal, 1), make(map[os.Signal]Callback, 5)}
+    sh = &Handler{make(chan os.Signal), make(map[os.Signal]Callback, 5)}
     S.Notify(sh.schan, os.Interrupt, os.Kill)
     return
 }
