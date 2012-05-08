@@ -22,6 +22,10 @@ var (
     l *logger
 )
 
+func init() {
+    l, _ = newLog("", LogAll)
+}
+
 func Init(file string, flag int) (err error) {
     l, err = newLog(file, flag)
     return
