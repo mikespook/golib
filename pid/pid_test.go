@@ -26,9 +26,10 @@ func TestProcessExists(t *testing.T) {
     }
     defer pf1.Close()
     pf2, err := New(PIDFILE)
-    if err != nil {
-        t.Error(err)
-    } else {
+    if err != ProcessExists {
+        t.Error("The process should exist.")
+    }
+    if pf2 != nil {
         defer pf2.Close()
     }
 }
