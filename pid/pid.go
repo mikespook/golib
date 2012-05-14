@@ -16,6 +16,7 @@ type PidFile struct {
 }
 
 func New(path string) (pf *PidFile, err error) {
+    pf = &PidFile{path, os.Getpid()}
     var f *os.File
     f, err = os.OpenFile(path, os.O_CREATE | os.O_EXCL | os.O_WRONLY, 0600)
     if err != nil {
@@ -43,15 +44,10 @@ func New(path string) (pf *PidFile, err error) {
         f.Truncate(int64(n))
     }
     defer f.Close()
-    pf = &PidFile{path, os.Getpid()}
     _, err = f.WriteString(strconv.Itoa(pf.Pid))
     return
 }
 
 func (pf *PidFile)Close() error {
     return os.Remove(pf.path)
-}
-
-func (pf *PidFile)String() string {
-    return strconv.Itoa(pf.Pid)
 }
