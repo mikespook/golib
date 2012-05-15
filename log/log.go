@@ -3,6 +3,7 @@ package log
 import (
     "os"
     "log"
+    "fmt"
 )
 
 const (
@@ -56,23 +57,35 @@ func Error(err error) {
     l.Printf("[ERR] %s", err.Error())
 }
 
-func Warning(msg string) {
+func Warning(msg ... interface{}) {
     if l.flag & DisableWarning == 0 {
         return
     }
-    l.Printf("[WRN] %s", msg)
+    l.Printf("[WRN] %s", msg ...)
 }
 
-func Message(msg string) {
+func Warningf(format string, msg ... interface{}) {
+    Warning(fmt.Sprintf(format, msg ...))
+}
+
+func Message(msg ... interface{}) {
     if l.flag & DisableMessage == 0 {
         return
     }
-    l.Printf("[MSG] %s", msg)
+    l.Printf("[MSG] %s", msg ...)
 }
 
-func Debug(msg string) {
+func Messagef(format string, msg ... interface{}) {
+    Message(fmt.Sprintf(format, msg ...))
+}
+
+func Debug(msg ... interface{}) {
     if l.flag & DisableDebug == 0 {
         return
     }
-    l.Printf("[DBG] %s", msg)
+    l.Printf("[DBG] %s", msg ...)
+}
+
+func Debugf(format string, msg ... interface{}) {
+    Debug(fmt.Sprintf(format, msg ...))
 }
