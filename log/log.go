@@ -56,7 +56,7 @@ func Errorf(format string, msg ... interface{}) {
 }
 
 func Error(err error) {
-    if l.flag ^ DisableError == 0 {
+    if l.flag & DisableError == 0 {
         return
     }
     l.Printf("[ERR] %s", err.Error())
