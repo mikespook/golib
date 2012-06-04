@@ -4,6 +4,7 @@ import (
     "os"
     "log"
     "fmt"
+    "errors"
 )
 
 const (
@@ -48,6 +49,10 @@ func newLog(file string, flag int) (l *logger, err error){
         l = &logger{log.New(os.Stdout, "", log.LstdFlags), flag}
     }
     return l, err
+}
+
+func Errorf(format string, msg ... interface{}) {
+    Error(errors.New(fmt.Sprintf(format, msg ...)))
 }
 
 func Error(err error) {
