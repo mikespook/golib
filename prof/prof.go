@@ -7,6 +7,7 @@ import (
 
 var (
     cpuFile, heapFile *os.File
+    Dumping bool
 )
 
 func Start(fn string) (err error) {
@@ -28,6 +29,7 @@ func NewDump(fn string) (err error) {
     if err != nil {
         return
     }
+    Dumping = true
     return
 }
 
@@ -36,5 +38,6 @@ func Dump() {
 }
 
 func CloseDump() {
+    Dumping = false
     heapFile.Close()
 }
