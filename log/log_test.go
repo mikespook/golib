@@ -17,17 +17,17 @@ func TestNewLog(t *testing.T) {
     defer os.Remove("testing.log")
     var err error
 
-    _, err = newLog("", LogAll)
+    _, err = NewLog("", LogAll, DefaultBufSize)
     if err != nil {
         t.Error(err)
     }
 
-    _, err = newLog("testing.log", LogAll)
+    _, err = NewLog("testing.log", LogAll, DefaultBufSize)
     if err != nil {
         t.Error(err)
     }
 
-    _, err = newLog("foobar/testing.log", LogAll)
+    _, err = NewLog("foobar/testing.log", LogAll, DefaultBufSize)
     if err != nil {
         t.Log(err)
     }
