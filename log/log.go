@@ -5,6 +5,7 @@ import (
     "log"
     "fmt"
     "errors"
+    "sync"
 )
 
 const (
@@ -32,6 +33,7 @@ type Logger struct {
     *log.Logger
     flag int
     logChan chan *logRecord
+    mutex sync.Mutex
 }
 
 type logRecord struct {
@@ -51,8 +53,10 @@ func NewLog(file string, flag, bufsize int) (l *Logger, err error){
     }
     l.logChan = make(chan *logRecord, bufsize)
     go func() {
+        l.mutex.Lock()
+        defer l.mutex.Unlock()
         var t string
-        for record, ok := <-l.logChan; ok; {
+        for record := range l.logChan {
             switch record.Type {
                 case TypeDebug:
                     t = "[DBG] %s"
@@ -117,6 +121,13 @@ func (l *Logger) Close() {
     close(l.logChan)
 }
 
+// Close the logger and waiting all messages was printed
+func (l *Logger) WaitClosing() {
+    defer l.mutex.Unlock()
+    l.Close()
+    l.mutex.Lock()
+}
+
 var (
     DefaultLogger *Logger
 )
@@ -164,4 +175,8 @@ func Debugf(format string, msg ... interface{}) {
 
 func Close() {
     DefaultLogger.Close()
+}
+
+func WaitClosing() {
+    DefaultLogger.WaitClosing()
 }
