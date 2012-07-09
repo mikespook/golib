@@ -113,6 +113,10 @@ func (l *Logger) Debugf(format string, msg ... interface{}) {
     l.Debug(fmt.Sprintf(format, msg ...))
 }
 
+func (l *Logger) Close() {
+    close(l.logChan)
+}
+
 var (
     DefaultLogger *Logger
 )
@@ -156,4 +160,8 @@ func Debug(msg ... interface{}) {
 
 func Debugf(format string, msg ... interface{}) {
     DefaultLogger.Debugf(format, msg ... )
+}
+
+func Close() {
+    DefaultLogger.Close()
 }

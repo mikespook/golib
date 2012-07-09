@@ -15,22 +15,24 @@ func TestFlag(t *testing.T) {
 
 func TestNewLog(t *testing.T) {
     defer os.Remove("testing.log")
-    var err error
 
-    _, err = NewLog("", LogAll, DefaultBufSize)
+    a, err := NewLog("", LogAll, DefaultBufSize)
     if err != nil {
         t.Error(err)
     }
+    defer a.Close()
 
-    _, err = NewLog("testing.log", LogAll, DefaultBufSize)
+    b, err := NewLog("testing.log", LogAll, DefaultBufSize)
     if err != nil {
         t.Error(err)
     }
+    defer b.Close()
 
-    _, err = NewLog("foobar/testing.log", LogAll, DefaultBufSize)
+    c, err := NewLog("foobar/testing.log", LogAll, DefaultBufSize)
     if err != nil {
         t.Log(err)
     }
+    defer c.Close()
 }
 
 func TestLog(t *testing.T) {
@@ -39,6 +41,7 @@ func TestLog(t *testing.T) {
     if err != nil {
         t.Error(err)
     }
+    defer Close()
 
     Error(errors.New("Test Error."))
     Warning("Test Warning.")
@@ -52,9 +55,11 @@ func TestDisableLog(t *testing.T) {
     if err != nil {
         t.Error(err)
     }
+    defer Close()
 
     Error(errors.New("Test Error."))
     Warning("Test Warning.")
     Message("Test Message.")
     Debug("Test Debug.")
 }
+
