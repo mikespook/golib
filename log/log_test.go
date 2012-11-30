@@ -4,6 +4,7 @@ import (
     "errors"
     "testing"
     "os"
+    "fmt"
 )
 
 func TestFlag(t *testing.T) {
@@ -61,5 +62,15 @@ func TestDisableLog(t *testing.T) {
     Warning("Test Warning.")
     Message("Test Message.")
     Debug("Test Debug.")
+}
+
+func TestFd(t *testing.T) {
+    err := Init("", LogAll)
+    if err != nil {
+        t.Error(err)
+    }
+    if Fd() != os.Stdout.Fd() {
+        t.Error(errors.New(fmt.Sprintf("FD %d respect, %d got.", os.Stdout.Fd(), Fd())))
+    }
 }
 

@@ -6,6 +6,7 @@ import (
     "fmt"
     "errors"
     "sync"
+    "runtime"
 )
 
 const (
@@ -34,6 +35,7 @@ type Logger struct {
     flag int
     logChan chan *logRecord
     mutex sync.Mutex
+    f *os.File
 }
 
 type logRecord struct {
@@ -45,11 +47,11 @@ func NewLog(file string, flag, bufsize int) (l *Logger, err error){
     if file != "" {
         f, err := os.OpenFile(file, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0600)
         if err == nil {
-            l = &Logger{Logger:log.New(f, "", log.LstdFlags), flag:flag}
+            l = &Logger{Logger:log.New(f, "", log.LstdFlags), flag:flag, f: f}
         }
     }
     if l == nil {
-        l = &Logger{Logger:log.New(os.Stdout, "", log.LstdFlags), flag:flag}
+        l = &Logger{Logger:log.New(os.Stdout, "", log.LstdFlags), flag:flag, f: os.Stdout}
     }
     l.logChan = make(chan *logRecord, bufsize)
     go func() {
@@ -71,6 +73,10 @@ func NewLog(file string, flag, bufsize int) (l *Logger, err error){
         }
     } ()
     return l, err
+}
+
+func(l *Logger) Fd() uintptr {
+    return l.f.Fd()
 }
 
 func (l *Logger) Errorf(format string, msg ... interface{}) {
@@ -136,6 +142,10 @@ func init() {
     DefaultLogger, _ = NewLog("", LogAll, DefaultBufSize)
 }
 
+func Fd() uintptr {
+    return DefaultLogger.Fd()
+}
+
 func Init(file string, flag int) (err error) {
     DefaultLogger, err = NewLog(file, flag, DefaultBufSize)
     return
@@ -179,4 +189,9 @@ func Close() {
 
 func WaitClosing() {
     DefaultLogger.WaitClosing()
+}
+
+func Exit(code int) {
+    runtime.Gosched()
+    os.Exit(code)
 }
