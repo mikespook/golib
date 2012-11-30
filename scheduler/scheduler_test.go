@@ -62,13 +62,13 @@ func Test(t *testing.T) {
     })
     ts.AddTask(&_task{
         id: ai.Id(),
-        start: n + 2 * time.Second,
+        start: n + 10 * time.Second,
         interval: time.Second,
         iterate: 0,
     })
     ts.AddTask(&_task{
         id: ai.Id(),
-        start: n + 2 * time.Second,
+        start: n + 10 * time.Second,
         interval: time.Second,
         iterate: 0,
     })
@@ -76,14 +76,39 @@ func Test(t *testing.T) {
     if c != 4 {
         t.Errorf("Task count should be 4 but get %d.", c)
     }
-    time.Sleep(1 * time.Second)
+    c = ts.TickCount(n)
+    if c != 2 {
+        t.Errorf("Task count should be 2 but get %d.", c)
+    }
+    c = ts.TickCount(n + 10 * time.Second)
+    if c != 2 {
+        t.Errorf("Task count should be 2 but get %d.", c)
+    }
+    time.Sleep(5 * time.Second)
     c = ts.Count()
     if c != 2 {
         t.Errorf("Task count should be 2 but get %d.", c)
     }
-    time.Sleep(1 * time.Second)
+    c = ts.TickCount(n)
+    if c != 0 {
+        t.Errorf("Task count should be 0 but get %d.", c)
+    }
+    c = ts.TickCount(n + 10 * time.Second)
+    if c != 2 {
+        t.Errorf("Task count should be 2 but get %d.", c)
+    }
+    time.Sleep(5 * time.Second)
     c = ts.Count()
     if c != 0 {
         t.Errorf("Task count should be 0 but get %d.", c)
     }
+    c = ts.TickCount(n)
+    if c != 0 {
+        t.Errorf("Task count should be 0 but get %d.", c)
+    }
+    c = ts.TickCount(n + 2 * time.Second)
+    if c != 0 {
+        t.Errorf("Task count should be 0 but get %d.", c)
+    }
+ 
 }

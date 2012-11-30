@@ -1,7 +1,6 @@
 package game
 
 import (
-    "fmt"
     "time"
     "sync"
 )
