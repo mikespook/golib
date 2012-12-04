@@ -3,11 +3,13 @@ package game
 import (
     "time"
     "sync"
+    "errors"
 )
 
 var (
     PoolSizePerTick = 10
     TickInterval = time.Second
+    ErrTaskNotFound = errors.New("The task was not found.")
 )
 
 // Task Interface
@@ -31,7 +33,7 @@ type Scheduler struct {
     HandleError func(error)
 }
 
-func NewScheduler() *Scheduler {
+func New() *Scheduler {
     ts := &Scheduler {
         ticks: make(map[time.Duration][]interface{}),
         tasks: make(map[interface{}]Task),
@@ -39,7 +41,7 @@ func NewScheduler() *Scheduler {
     return ts
 }
 
-func (ts *Scheduler) AddTask(task Task) {
+func (ts *Scheduler) Put(task Task) {
     ts.mutex.Lock()
     defer ts.mutex.Unlock()
     id := task.Id()
@@ -65,6 +67,17 @@ func (ts *Scheduler) Cancel(id interface{}) (err error) {
     return
 }
 
+func (ts *Scheduler) Exec(id interface{}) (err error) {
+    ts.mutex.Lock()
+    defer ts.mutex.Unlock()
+    if task, ok := ts.tasks[id]; ok {
+        err = ts.exec(task)
+    } else {
+        err = ErrTaskNotFound
+    }
+    return
+}
+
 func (ts *Scheduler) Get(id interface{}) Task {
     ts.mutex.RLock()
     defer ts.mutex.RUnlock()
@@ -83,38 +96,37 @@ func (ts *Scheduler) TickCount(t time.Duration) int {
     return len(ts.ticks[t])
 }
 
+func (ts *Scheduler) exec(task Task) (err error) {
+    ts.mutex.Lock()
+    defer func () {
+        ts.mutex.Unlock()
+        if e := recover(); e != nil {
+            err = e.(error)
+        }
+    }()
+    err = task.Exec()
+    if task.Iterate() == 0 {
+        delete(ts.tasks, task.Id())
+    } else {
+        task.SetStart(task.Start() + task.Interval())
+        ts.Put(task)
+    }
+    return
+}
+
 func (ts *Scheduler) Loop() {
     for now := range time.Tick(TickInterval) {
         current := time.Duration(now.UnixNano())
         for t := range ts.ticks {
             // task executing time less/equal current time
             if t <= current {
-                ts.mutex.Lock()
                 for index := range ts.ticks[t] {
                     id := ts.ticks[t][index]
                     if task, ok := ts.tasks[id]; ok {
-                        go func() {
-                            defer func () {
-                                if err := recover(); err != nil {
-                                    if ts.HandleError != nil {
-                                        ts.HandleError(err.(error))
-                                    } else {
-                                        panic(err)
-                                    }
-                                }
-                            }()
-                            task.Exec()
-                            if task.Iterate() == 0 {
-                                delete(ts.tasks, id)
-                            } else {
-                                task.SetStart(task.Start() + task.Interval())
-                                ts.AddTask(task)
-                            }
-                        }()
+                        go ts.exec(task)
                     }
                 }
                 delete(ts.ticks, t)
-                ts.mutex.Unlock()
             }
         }
     }

@@ -45,30 +45,33 @@ func (t *_task)Cancel() error {
 }
 
 func Test(t *testing.T) {
-    ts := NewScheduler()
+    ts := New()
+    ts.HandleError = func(err error) {
+        t.Error(err)
+    }
     go ts.Loop()
     n := time.Duration(time.Now().UnixNano())
-    ts.AddTask(&_task{
+    ts.Put(&_task{
         id: ai.Id(),
-        start: n,
+        start: n + time.Second,
         interval: time.Second,
         iterate: 0,
     })
-    ts.AddTask(&_task{
+    ts.Put(&_task{
         id: ai.Id(),
-        start: n,
+        start: n + time.Second,
         interval: time.Second,
         iterate: 0,
     })
-    ts.AddTask(&_task{
+    ts.Put(&_task{
         id: ai.Id(),
-        start: n + 10 * time.Second,
+        start: n + 3 * time.Second,
         interval: time.Second,
         iterate: 0,
     })
-    ts.AddTask(&_task{
+    ts.Put(&_task{
         id: ai.Id(),
-        start: n + 10 * time.Second,
+        start: n + 3 * time.Second,
         interval: time.Second,
         iterate: 0,
     })
@@ -76,15 +79,15 @@ func Test(t *testing.T) {
     if c != 4 {
         t.Errorf("Task count should be 4 but get %d.", c)
     }
-    c = ts.TickCount(n)
+    c = ts.TickCount(n + time.Second)
     if c != 2 {
         t.Errorf("Task count should be 2 but get %d.", c)
     }
-    c = ts.TickCount(n + 10 * time.Second)
+    c = ts.TickCount(n + 3 * time.Second)
     if c != 2 {
         t.Errorf("Task count should be 2 but get %d.", c)
     }
-    time.Sleep(5 * time.Second)
+    time.Sleep(2 * time.Second)
     c = ts.Count()
     if c != 2 {
         t.Errorf("Task count should be 2 but get %d.", c)
@@ -93,11 +96,11 @@ func Test(t *testing.T) {
     if c != 0 {
         t.Errorf("Task count should be 0 but get %d.", c)
     }
-    c = ts.TickCount(n + 10 * time.Second)
+    c = ts.TickCount(n + 3 * time.Second)
     if c != 2 {
         t.Errorf("Task count should be 2 but get %d.", c)
     }
-    time.Sleep(5 * time.Second)
+    time.Sleep(2 * time.Second)
     c = ts.Count()
     if c != 0 {
         t.Errorf("Task count should be 0 but get %d.", c)
