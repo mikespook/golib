@@ -20,7 +20,6 @@ const (
     LogWarning = LogAll ^ DisableMessage ^ DisableDebug ^ DisableError
     LogMessage = LogAll ^ DisableDebug ^ DisableError ^ DisableWarning
     LogDebug = LogAll ^ DisableError ^ DisableWarning ^ DisableMessage
-    DefaultBufSize = 32
 )
 
 const (
@@ -136,6 +135,7 @@ func (l *Logger) WaitClosing() {
 
 var (
     DefaultLogger *Logger
+    DefaultBufSize = 32
 )
 
 func init() {
