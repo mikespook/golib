@@ -1,11 +1,11 @@
 package golib
 
 import (
-    _ "bitbucket.org/mikespook/golib/cache"
-    _ "bitbucket.org/mikespook/golib/log"
-    _ "bitbucket.org/mikespook/golib/pid"
-    _ "bitbucket.org/mikespook/golib/prof"
-    _ "bitbucket.org/mikespook/golib/signal"
-    _ "bitbucket.org/mikespook/golib/autoinc"
-    _ "bitbucket.org/mikespook/golib/funcmap"
+    _ "github.com/mikespook/golib/cache"
+    _ "github.com/mikespook/golib/log"
+    _ "github.com/mikespook/golib/pid"
+    _ "github.com/mikespook/golib/prof"
+    _ "github.com/mikespook/golib/signal"
+    _ "github.com/mikespook/golib/autoinc"
+    _ "github.com/mikespook/golib/funcmap"
 )

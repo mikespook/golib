@@ -3,8 +3,8 @@ package scheduler
 import (
     "time"
     "testing"
-     "bitbucket.org/mikespook/golib/log"
-     "bitbucket.org/mikespook/golib/autoinc"
+    "github.com/mikespook/golib/log"
+    "github.com/mikespook/golib/autoinc"
 )
 
 var (
@@ -113,5 +113,5 @@ func Test(t *testing.T) {
     if c != 0 {
         t.Errorf("Task count should be 0 but get %d.", c)
     }
- 
+
 }
