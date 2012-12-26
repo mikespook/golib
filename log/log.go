@@ -1,6 +1,7 @@
 package log
 
 import (
+    "io"
     "os"
     "log"
     "fmt"
@@ -34,7 +35,6 @@ type Logger struct {
     flag int
     logChan chan *logRecord
     mutex sync.Mutex
-    f *os.File
 }
 
 type logRecord struct {
@@ -42,16 +42,8 @@ type logRecord struct {
     Message []interface{}
 }
 
-func NewLog(file string, flag, bufsize int) (l *Logger, err error){
-    if file != "" {
-        f, err := os.OpenFile(file, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0600)
-        if err == nil {
-            l = &Logger{Logger:log.New(f, "", log.LstdFlags), flag:flag, f: f}
-        }
-    }
-    if l == nil {
-        l = &Logger{Logger:log.New(os.Stdout, "", log.LstdFlags), flag:flag, f: os.Stdout}
-    }
+func New(w io.Writer, flag, bufsize int) (l *Logger, err error) {
+    l = &Logger{Logger:log.New(w, "", log.LstdFlags), flag:flag}
     l.logChan = make(chan *logRecord, bufsize)
     go func() {
         l.mutex.Lock()
@@ -74,8 +66,18 @@ func NewLog(file string, flag, bufsize int) (l *Logger, err error){
     return l, err
 }
 
-func(l *Logger) Fd() uintptr {
-    return l.f.Fd()
+func NewLog(file string, flag, bufsize int) (l *Logger, err error){
+    var f *os.File
+    if file != "" {
+        f, err = os.OpenFile(file, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0600)
+        if err == nil {
+            f = os.Stdout
+        }
+    }
+    if l == nil {
+        f = os.Stdout
+    }
+    return New(f, flag, bufsize)
 }
 
 func (l *Logger) Errorf(format string, msg ... interface{}) {
@@ -140,10 +142,6 @@ var (
 
 func init() {
     DefaultLogger, _ = NewLog("", LogAll, DefaultBufSize)
-}
-
-func Fd() uintptr {
-    return DefaultLogger.Fd()
 }
 
 func Init(file string, flag int) (err error) {
