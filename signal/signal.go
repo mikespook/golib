@@ -22,17 +22,6 @@ func NewHandler() (sh *Handler) {
     return
 }
 
-func (sh *Handler)Send(pid int, signal os.Signal) error {
-    proc, err := os.FindProcess(pid)
-    if err != nil {
-        return err
-    }
-    if err := proc.Signal(signal); err != nil {
-        return err
-    }
-    return nil
-}
-
 func (sh *Handler)Bind(s os.Signal, cb Callback) {
     sh.cb[s] = cb
 }
@@ -48,3 +37,27 @@ func (sh *Handler)Loop() os.Signal {
     }
     return nil
 }
+
+var (
+    DefaultHandler = NewHandler()
+)
+
+func Bind(s os.Signal, cb Callback) {
+    DefaultHandler.Bind(s, cb)
+}
+
+func Loop() os.Signal {
+    return DefaultHandler.Loop()
+}
+
+func Send(pid int, signal os.Signal) error {
+    proc, err := os.FindProcess(pid)
+    if err != nil {
+        return err
+    }
+    if err := proc.Signal(signal); err != nil {
+        return err
+    }
+    return nil
+}
+
