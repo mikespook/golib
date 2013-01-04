@@ -11,7 +11,7 @@ var (
         "errstring": "Can not call this as a function",
         "errnumeric": 123456789,
     }
-    funcs = NewFuncs(100)
+    funcs = New(100)
 )
 
 func TestBind(t *testing.T) {

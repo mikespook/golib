@@ -11,7 +11,7 @@ var (
 
 type Funcs map[string]reflect.Value
 
-func NewFuncs(size int) Funcs {
+func New(size int) Funcs {
     return make(Funcs, size)
 }
 
