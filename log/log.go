@@ -70,7 +70,7 @@ func NewLog(file string, flag, bufsize int) (l *Logger, err error){
     var f *os.File
     if file != "" {
         f, err = os.OpenFile(file, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0600)
-        if err == nil {
+        if err != nil {
             f = os.Stdout
         }
     }
