@@ -74,7 +74,7 @@ func NewLog(file string, flag, bufsize int) (l *Logger, err error){
             f = os.Stdout
         }
     }
-    if l == nil {
+    if f == nil {
         f = os.Stdout
     }
     return New(f, flag, bufsize)
