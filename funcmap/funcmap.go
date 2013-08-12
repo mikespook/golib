@@ -11,8 +11,8 @@ var (
 
 type Funcs map[string]reflect.Value
 
-func New(size int) Funcs {
-    return make(Funcs, size)
+func New() Funcs {
+    return make(Funcs, 2)
 }
 
 func (f Funcs) Bind(name string, fn interface{}) (err error) {
