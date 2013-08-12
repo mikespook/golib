@@ -12,7 +12,7 @@ import (
 type testIpt struct {}
 
 func (t *testIpt) Exec(name string, params interface{}) error {return nil}
-func (t *testIpt) Init(path string, pool *IptPool) error {return nil}
+func (t *testIpt) Init(path string) error {return nil}
 func (t *testIpt) Final() error {return nil}
 func (t *testIpt) Bind(name string, item interface{}) error {return nil}
 

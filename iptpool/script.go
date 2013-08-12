@@ -18,7 +18,7 @@ type EventFunc func(ScriptIpt) error
 
 type ScriptIpt interface {
     Exec(name string, params interface{}) error
-    Init(path string, pool *IptPool) error
+    Init(path string) error
     Final() error
 	Bind(name string, item interface{}) error
 }
