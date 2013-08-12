@@ -13,11 +13,12 @@ var (
 	DefaultMaxIdle = 32
 )
 
-type NewFunc func() ScriptIpt
+type CreateFunc func() ScriptIpt
+type EventFunc func(ScriptIpt) error
 
 type ScriptIpt interface {
     Exec(name string, params interface{}) error
-    Init(path string, pool IptPool) error
+    Init(path string, pool *IptPool) error
     Final() error
 	Bind(name string, item interface{}) error
 }
@@ -26,18 +27,15 @@ type IptPool struct {
 	maxIdle int
 	mu sync.Mutex
 	freeIpt []ScriptIpt
-	newFunc NewFunc
+	create CreateFunc
+
+	OnCreate EventFunc
 }
 
-func NewIptPool(newFunc NewFunc, preassign bool) (pool *IptPool) {
+func NewIptPool(create CreateFunc) (pool *IptPool) {
 	pool = &IptPool{
 		maxIdle: DefaultMaxIdle,
-		newFunc: newFunc,
-	}
-	if preassign {
-		for i := 0; i < pool.maxIdle; i ++ {
-			pool.Put(pool.newFunc())
-		}
+		create: create,
 	}
 	return
 }
@@ -51,7 +49,7 @@ func (pool *IptPool) Get() (ipt ScriptIpt) {
 		pool.freeIpt = pool.freeIpt[:n-1]
 		return
 	}
-	ipt = pool.newFunc()
+	ipt = pool.New()
 	return
 }
 
@@ -65,6 +63,9 @@ func (pool *IptPool) Put(ipt ScriptIpt) {
 	return
 }
 
+func (pool *IptPool) GetMaxIdle() int {
+	return pool.maxIdle
+}
 
 func (pool *IptPool) SetMaxIdle(maxIdle int) {
 	pool.mu.Lock()
@@ -80,6 +81,14 @@ func (pool *IptPool) SetMaxIdle(maxIdle int) {
 	if n := len(pool.freeIpt); n > maxIdle {
 		pool.freeIpt = pool.freeIpt[:maxIdle-1]
 	}
+}
+
+func (pool *IptPool) New() ScriptIpt {
+	ipt := pool.create()
+	if pool.OnCreate != nil {
+		pool.OnCreate(ipt)
+	}
+	return ipt
 }
 
 func (pool *IptPool) Free() map[int]error {

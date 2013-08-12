@@ -11,17 +11,17 @@ import (
 
 type testIpt struct {}
 
-func (t testIpt) Exec(name string, params interface{}) error {return nil}
-func (t testIpt) Init(path string, pool IptPool) error {return nil}
-func (t testIpt) Final() error {return nil}
-func (t testIpt) Bind(name string, item interface{}) error {return nil}
+func (t *testIpt) Exec(name string, params interface{}) error {return nil}
+func (t *testIpt) Init(path string, pool *IptPool) error {return nil}
+func (t *testIpt) Final() error {return nil}
+func (t *testIpt) Bind(name string, item interface{}) error {return nil}
 
 func newTestIpt() ScriptIpt {
 	return &testIpt{}
 }
 
 func TestPool(t *testing.T) {
-	pool := NewIptPool(newTestIpt, false)
+	pool := NewIptPool(newTestIpt)
 	if n := pool.Length(); n != 0 {
 		t.Error("Wrong pool length: %d", n)
 	}
@@ -37,7 +37,10 @@ func TestPool(t *testing.T) {
 }
 
 func TestPoolPreassign(t *testing.T) {
-	pool := NewIptPool(newTestIpt, true)
+	pool := NewIptPool(newTestIpt)
+	for i := 0; i < pool.GetMaxIdle(); i ++ {
+		pool.Put(pool.New())
+	}
 	if n := pool.Length(); n != DefaultMaxIdle {
 		t.Error("Wrong pool length: %d", n)
 	}
