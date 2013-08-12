@@ -21,7 +21,7 @@ func (id *objectId) Id() interface{} {
     return bson.NewObjectId().Hex()
 }
 
-func NewObjectId() IdGen {
+func NewObjectId() *objectId {
     return &objectId{}
 }
 
@@ -34,6 +34,6 @@ func (id *autoincId) Id() interface{} {
     return id.AutoInc.Id()
 }
 
-func NewAutoIncId() IdGen {
+func NewAutoIncId() *autoincId {
     return &autoincId{autoinc.New(1, 1)}
 }
