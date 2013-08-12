@@ -6,11 +6,24 @@ import (
     "os"
 )
 
+var (
+	flags = map[string]int {
+		"all": LogAll,
+		"debug|message": LogNone | LogDebug | LogMessage,
+		"none": LogNone,
+	}
+)
+
 func TestFlag(t *testing.T) {
     f1 := LogAll ^ DisableDebug
     if f1 & DisableDebug != 0 {
         t.Error("Flags of log was broken.")
     }
+	for flag, level := range flags {
+		if StrToLevel(flag) != level {
+		    t.Errorf("Flag %s needed, but %d got.", flag, level)
+		}
+	}
 }
 
 func TestNewLog(t *testing.T) {
