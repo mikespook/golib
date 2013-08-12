@@ -3,7 +3,7 @@
 // Use of this source code is governed by a commercial
 // license that can be found in the LICENSE file.
 
-package scriptpool
+package iptpool
 
 import (
     "testing"
@@ -12,7 +12,7 @@ import (
 type testIpt struct {}
 
 func (t testIpt) Exec(name string, params interface{}) error {return nil}
-func (t testIpt) Init(path string, pool ScriptPool) error {return nil}
+func (t testIpt) Init(path string, pool IptPool) error {return nil}
 func (t testIpt) Final() error {return nil}
 func (t testIpt) Bind(name string, item interface{}) error {return nil}
 
@@ -21,7 +21,7 @@ func newTestIpt() ScriptIpt {
 }
 
 func TestPool(t *testing.T) {
-	pool := NewScriptPool(newTestIpt, false)
+	pool := NewIptPool(newTestIpt, false)
 	if n := pool.Length(); n != 0 {
 		t.Error("Wrong pool length: %d", n)
 	}
@@ -37,7 +37,7 @@ func TestPool(t *testing.T) {
 }
 
 func TestPoolPreassign(t *testing.T) {
-	pool := NewScriptPool(newTestIpt, true)
+	pool := NewIptPool(newTestIpt, true)
 	if n := pool.Length(); n != DefaultMaxIdle {
 		t.Error("Wrong pool length: %d", n)
 	}

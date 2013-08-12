@@ -3,7 +3,7 @@
 // Use of this source code is governed by a commercial
 // license that can be found in the LICENSE file.
 
-package scriptpool
+package iptpool
 
 import (
 	"sync"
@@ -17,20 +17,20 @@ type NewFunc func() ScriptIpt
 
 type ScriptIpt interface {
     Exec(name string, params interface{}) error
-    Init(path string, pool ScriptPool) error
+    Init(path string, pool IptPool) error
     Final() error
 	Bind(name string, item interface{}) error
 }
 
-type ScriptPool struct {
+type IptPool struct {
 	maxIdle int
 	mu sync.Mutex
 	freeIpt []ScriptIpt
 	newFunc NewFunc
 }
 
-func NewScriptPool(newFunc NewFunc, preassign bool) (pool *ScriptPool) {
-	pool = &ScriptPool{
+func NewIptPool(newFunc NewFunc, preassign bool) (pool *IptPool) {
+	pool = &IptPool{
 		maxIdle: DefaultMaxIdle,
 		newFunc: newFunc,
 	}
@@ -42,7 +42,7 @@ func NewScriptPool(newFunc NewFunc, preassign bool) (pool *ScriptPool) {
 	return
 }
 
-func (pool *ScriptPool) Get() (ipt ScriptIpt) {
+func (pool *IptPool) Get() (ipt ScriptIpt) {
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 
@@ -55,7 +55,7 @@ func (pool *ScriptPool) Get() (ipt ScriptIpt) {
 	return
 }
 
-func (pool *ScriptPool) Put(ipt ScriptIpt) {
+func (pool *IptPool) Put(ipt ScriptIpt) {
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 	if n := len(pool.freeIpt); n > pool.maxIdle {
@@ -66,7 +66,7 @@ func (pool *ScriptPool) Put(ipt ScriptIpt) {
 }
 
 
-func (pool *ScriptPool) SetMaxIdle(maxIdle int) {
+func (pool *IptPool) SetMaxIdle(maxIdle int) {
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 	if maxIdle <= 0 {
@@ -82,7 +82,7 @@ func (pool *ScriptPool) SetMaxIdle(maxIdle int) {
 	}
 }
 
-func (pool *ScriptPool) Free() map[int]error {
+func (pool *IptPool) Free() map[int]error {
 	pool.mu.Lock()
 	defer pool.mu.Unlock()
 	emap := make(map[int]error)
@@ -94,6 +94,6 @@ func (pool *ScriptPool) Free() map[int]error {
 	return emap
 }
 
-func (pool *ScriptPool) Length() int {
+func (pool *IptPool) Length() int {
 	return len(pool.freeIpt)
 }
