@@ -27,16 +27,20 @@ func (sh *Handler)Bind(s os.Signal, cb Callback) {
 }
 
 func (sh *Handler)Loop() os.Signal {
-    for {
-        s := <-sh.schan
-        f, ok := sh.cb[s]
-        if ok {
-            f()
-            return s
+    for s := range sh.schan {
+        if f, ok := sh.cb[s]; ok {
+            if f() {
+	            return s
+			}
         }
     }
     return nil
 }
+
+func (sh *Handler) Close() {
+    close(sh.schan)
+}
+
 
 var (
     DefaultHandler = NewHandler()
@@ -61,3 +65,6 @@ func Send(pid int, signal os.Signal) error {
     return nil
 }
 
+func Close() {
+	DefaultHandler.Close()
+}
