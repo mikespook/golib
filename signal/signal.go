@@ -18,11 +18,11 @@ func NewHandler() (sh *Handler) {
         schan: make(chan os.Signal),
         cb: make(map[os.Signal]Callback, 5),
     }
-    S.Notify(sh.schan, os.Interrupt, os.Kill)
     return
 }
 
 func (sh *Handler)Bind(s os.Signal, cb Callback) {
+    S.Notify(sh.schan, s)
     sh.cb[s] = cb
 }
 
