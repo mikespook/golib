@@ -26,6 +26,10 @@ func (sh *Handler)Bind(s os.Signal, cb Callback) {
     sh.cb[s] = cb
 }
 
+func (sh *Handler) Unbind(s os.Signal) {
+    delete(sh.cb, s)
+}
+
 func (sh *Handler)Loop() os.Signal {
     for s := range sh.schan {
         if f, ok := sh.cb[s]; ok {
@@ -38,6 +42,7 @@ func (sh *Handler)Loop() os.Signal {
 }
 
 func (sh *Handler) Close() {
+	S.Stop(sh.schan)
     close(sh.schan)
 }
 
@@ -49,6 +54,11 @@ var (
 func Bind(s os.Signal, cb Callback) {
     DefaultHandler.Bind(s, cb)
 }
+
+func Unbind(s os.Signal) {
+    DefaultHandler.Unbind(s)
+}
+
 
 func Loop() os.Signal {
     return DefaultHandler.Loop()
