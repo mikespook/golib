@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/mail"
 	"path/filepath"
+	"mime"
 )
 
 const (
@@ -100,20 +101,36 @@ func (b *Body) Bytes() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-type Attachment string
+type ContentAttach struct {
+	ContentType string
+	FileName string
+	Content []byte
+}
 
-func (a Attachment) Bytes() ([]byte, error) {
+func (a *ContentAttach) Bytes() ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
-	_, fileName := filepath.Split(string(a))
 	buf.WriteString("\n--" + boundary + "\n")
-	buf.WriteString("Content-Type: application/octet-stream\n")
+	buf.WriteString("Content-Type: " + a.ContentType + "\n")
 	buf.WriteString("Content-Transfer-Encoding: base64\n")
-	buf.WriteString("Content-Disposition: attachment; filename=\"" + fileName + "\"\n\n")
+	buf.WriteString("Content-Disposition: attachment; filename=\"" + a.FileName + "\"\n\n")
+	buf.WriteString(base64.StdEncoding.EncodeToString(a.Content))
+	buf.WriteString("\n")
+	return buf.Bytes(), nil
+}
+
+type FileAttach string
+
+func (a FileAttach) Bytes() ([]byte, error) {
+	ca := &ContentAttach{}
+	_, ca.FileName = filepath.Split(string(a))
+	ca.ContentType = mime.TypeByExtension(filepath.Ext(ca.FileName))
+	if ca.ContentType == "" {
+		ca.ContentType = "application/octet-stream"
+	}
 	b, err := ioutil.ReadFile(string(a))
 	if err != nil {
 		return nil, err
 	}
-	buf.WriteString(base64.StdEncoding.EncodeToString(b))
-	buf.WriteString("\n")
-	return buf.Bytes(), nil
+	ca.Content = b
+	return ca.Bytes()
 }

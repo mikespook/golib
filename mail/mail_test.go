@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	TMP = "/tmp/mail.test"
+	TMP = "/tmp/mail.jpg"
 )
 
 var (
@@ -23,7 +23,7 @@ var (
 		ContentType: "text/html",
 		Content:     []byte("<strong>Hello</strong>"),
 	}
-	attachment = Attachment(TMP)
+	attachment = FileAttach(TMP)
 )
 
 func TestSubject(t *testing.T) {
