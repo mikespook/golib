@@ -96,6 +96,8 @@ func (h *Header) Bytes() []byte {
 	}
 	buf.WriteString("Subject: " + h.Subject.String() + "\n")
 	buf.WriteString("MIME-Version: 1.0\n")
+	buf.WriteString("Content-Type: multipart/alternative;boundary=\"" + boundary + "\"\n")
+	buf.WriteString("\nThis is a multi-part message in MIME format.\n")
 	return buf.Bytes()
 }
 
