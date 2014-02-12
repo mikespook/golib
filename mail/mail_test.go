@@ -33,6 +33,10 @@ func TestSubject(t *testing.T) {
 }
 
 func TestHeader(t *testing.T) {
+	list := header.ToList()
+	if len(list) != 3 {
+		t.Error("The length of To list should be 3")
+	}
 	t.Logf("%s", header.Bytes())
 }
 

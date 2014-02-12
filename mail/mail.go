@@ -70,6 +70,20 @@ type Header struct {
 	Subject Subject
 }
 
+func (h *Header) ToList() []string {
+	list := make([]string, 0, len(h.To))
+	for _, to := range h.To {
+		list = append(list, to.Address)
+	}
+	for _, cc := range h.Cc {
+		list = append(list, cc.Address)
+	}
+	for _, bcc := range h.Bcc {
+		list = append(list, bcc.Address)
+	}
+	return list
+}
+
 func (h *Header) Bytes() []byte {
 	buf := bytes.NewBuffer(nil)
 	buf.WriteString("From: " + h.From.String() + "\n")
