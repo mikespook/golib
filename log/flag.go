@@ -11,9 +11,7 @@ import (
 )
 
 var (
-    LogFile  = flag.String("log", "",
-        "log to write " +
-        "(empty for STDOUT)")
+    LogFile  = flag.String("log", "", "log to write (empty for STDOUT)")
     LogLevel = flag.String("log-level", "all", "log level " +
         "('error', 'warning', 'message', 'debug', 'all' and 'none'" +
         " are combined with '|')")
@@ -43,11 +41,7 @@ func StrToLevel(str string) int {
 	return level
 }
 
-func Flag() {
-	if !flag.Parsed() {
-        flag.Parse()
-    }
-
+func InitWithFlag() {
     if err := Init(*LogFile, StrToLevel(*LogLevel)); err != nil {
         Error(err)
     }
