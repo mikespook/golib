@@ -70,21 +70,23 @@ func (storage *cookieStorage) Flush(s *Session) {
 	http.SetCookie(s.w, value)
 }
 
-func (storage *cookieStorage) LoadTo(r *http.Request, s *Session) {
+func (storage *cookieStorage) LoadTo(r *http.Request, s *Session) error {
 	cookie, err := r.Cookie(storage.keyName)
 	if err != nil {
 		s.Init()
-		return
+		return err
 	}
 	s.id = cookie.Value
 	cookie, err = r.Cookie(cookie.Value)
 	if err != nil {
 		s.Init()
-		return
+		return err
 	}
-	if err := decoding([]byte(s.id), []byte(cookie.Value), &s.data); err != nil {
+	if err := decoding([]byte(s.id), cookie.Value, &s.data); err != nil {
 		s.data = make(M)
+		return err
 	}
+	return nil
 }
 
 func CookieStorage(keyName string, options M) Storage {

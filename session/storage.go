@@ -8,18 +8,18 @@ import (
 	"encoding/base64"
 	"encoding/gob"
 	"errors"
-	"fmt"
 	"net/http"
 )
 
 type Storage interface {
 	Clean(*Session)
 	Flush(*Session)
-	LoadTo(*http.Request, *Session)
+	LoadTo(*http.Request, *Session) error
 }
 
 const (
-	keySize = 16
+	keySize    = 16
+	aesKeySize = 32
 )
 
 var (
@@ -30,8 +30,15 @@ func SetKey(key []byte) {
 	defaultKey = key[:keySize]
 }
 
+func GetKey() []byte {
+	return defaultKey
+}
+
 func encrypt(key, value []byte) ([]byte, error) {
-	key = append(key[:32-keySize], defaultKey...)
+	if len(key) < aesKeySize-keySize {
+		return nil, errTooShort
+	}
+	key = append(key[:aesKeySize-keySize], defaultKey...)
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -43,10 +50,13 @@ func encrypt(key, value []byte) ([]byte, error) {
 	return append(iv, value...), nil
 }
 
-var errTooShort = errors.New("The cipher text is too short.")
+var errTooShort = errors.New("Too short")
 
 func decrypt(key, value []byte) ([]byte, error) {
-	key = append(key[:32-keySize], defaultKey...)
+	if len(key) < aesKeySize - keySize {
+		return nil, errTooShort
+	}
+	key = append(key[:aesKeySize-keySize], defaultKey...)
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -61,11 +71,9 @@ func decrypt(key, value []byte) ([]byte, error) {
 	return nil, errTooShort
 }
 
-func decoding(key, src []byte, dst *M) error {
+func decoding(key []byte, src string, dst *M) error {
 	// 1. base64 decoding
-	n := base64.StdEncoding.DecodedLen(len(src))
-	buf := make([]byte, n)
-	_, err := base64.StdEncoding.Decode(buf, src)
+	buf, err := base64.StdEncoding.DecodeString(src)
 	if err != nil {
 		return err
 	}
