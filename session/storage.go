@@ -38,9 +38,12 @@ func GetKey() []byte {
 	return defaultKey
 }
 
+var errKeyTooShort = errors.New("The key is too short")
+var errValueTooShort = errors.New("The block is too short")
+
 func encrypt(key, value []byte) ([]byte, error) {
 	if len(key) < aesKeySize-keySize {
-		return nil, errTooShort
+		return nil, errKeyTooShort
 	}
 	key = append(key[:aesKeySize-keySize], defaultKey...)
 	block, err := aes.NewCipher(key)
@@ -54,11 +57,9 @@ func encrypt(key, value []byte) ([]byte, error) {
 	return append(iv, value...), nil
 }
 
-var errTooShort = errors.New("Too short")
-
 func decrypt(key, value []byte) ([]byte, error) {
 	if len(key) < aesKeySize - keySize {
-		return nil, errTooShort
+		return nil, errKeyTooShort
 	}
 	key = append(key[:aesKeySize-keySize], defaultKey...)
 	block, err := aes.NewCipher(key)
@@ -72,7 +73,7 @@ func decrypt(key, value []byte) ([]byte, error) {
 		stream.XORKeyStream(value, value)
 		return value, nil
 	}
-	return nil, errTooShort
+	return nil, errValueTooShort
 }
 
 func decoding(key []byte, src string, dst *M) error {
