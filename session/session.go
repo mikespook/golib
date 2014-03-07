@@ -40,12 +40,12 @@ func (s *Session) Init() {
 	s.id = fmt.Sprintf("%x", genKey(IdLength))
 }
 
-func (s *Session) Clean() {
-	s.storage.Clean(s)
+func (s *Session) Clean() error {
+	return s.storage.Clean(s)
 }
 
-func (s *Session) Flush() {
-	s.storage.Flush(s)
+func (s *Session) Flush() error {
+	return s.storage.Flush(s)
 }
 
 func genKey(size int) []byte {

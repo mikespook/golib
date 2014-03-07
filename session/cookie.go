@@ -45,7 +45,7 @@ func fillCookie(options M, cookie *http.Cookie) {
 	}
 }
 
-func (storage *cookieStorage) Clean(s *Session) {
+func (storage *cookieStorage) Clean(s *Session) error {
 	key := &http.Cookie{Name: storage.keyName}
 	fillCookie(optionsClean, key)
 	http.SetCookie(s.w, key)
@@ -53,21 +53,24 @@ func (storage *cookieStorage) Clean(s *Session) {
 	fillCookie(optionsClean, value)
 	http.SetCookie(s.w, value)
 	s.Init()
+	return nil
 }
 
-func (storage *cookieStorage) Flush(s *Session) {
+func (storage *cookieStorage) Flush(s *Session) error {
 	key := &http.Cookie{
 		Name:  storage.keyName,
 		Value: s.id,
 	}
 	fillCookie(storage.options, key)
 	http.SetCookie(s.w, key)
+	v, err := encoding([]byte(s.id), s.data)
 	value := &http.Cookie{
 		Name:  s.id,
-		Value: encoding([]byte(s.id), s.data),
+		Value: v,
 	}
 	fillCookie(storage.options, value)
 	http.SetCookie(s.w, value)
+	return err
 }
 
 func (storage *cookieStorage) LoadTo(r *http.Request, s *Session) error {

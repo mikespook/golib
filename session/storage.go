@@ -11,9 +11,13 @@ import (
 	"net/http"
 )
 
+func init() {
+	gob.Register(M{})
+}
+
 type Storage interface {
-	Clean(*Session)
-	Flush(*Session)
+	Clean(*Session) error
+	Flush(*Session) error
 	LoadTo(*http.Request, *Session) error
 }
 
@@ -90,18 +94,18 @@ func decoding(key []byte, src string, dst *M) error {
 	return nil
 }
 
-func encoding(key []byte, src map[string]interface{}) string {
+func encoding(key []byte, src map[string]interface{}) (string, error){
 	// 1. gob encoding
 	var buf bytes.Buffer
 	g := gob.NewEncoder(&buf)
 	if err := g.Encode(src); err != nil {
-		return ""
+		return "", err
 	}
 	// 2. cypto encoding
 	ciphertext, err := encrypt(key, buf.Bytes())
 	if err != nil {
-		return ""
+		return "", err
 	}
 	// 3. base64 encoding
-	return base64.StdEncoding.EncodeToString(ciphertext)
+	return base64.StdEncoding.EncodeToString(ciphertext), nil
 }

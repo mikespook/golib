@@ -4,15 +4,15 @@ import (
 	"net/http"
 )
 
-type FactoryFunc func(http.ResponseWriter, *http.Request) *Session
+type FactoryFunc func(http.ResponseWriter, *http.Request) (*Session, error)
 
 func NewFactory(storage Storage) FactoryFunc {
-	return func(w http.ResponseWriter, r *http.Request) (s *Session) {
+	return func(w http.ResponseWriter, r *http.Request) (s *Session, err error) {
 		s = &Session{
 			storage: storage,
 			w:       w,
 		}
-		storage.LoadTo(r, s)
+		err = storage.LoadTo(r, s)
 		return
 	}
 }
