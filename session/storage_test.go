@@ -32,13 +32,13 @@ func TestCrypt(t *testing.T) {
 	}
 	copy(src, originText)
 	_, err = encrypt(tooShortKey, src)
-	if err != errTooShort {
-		t.Errorf("Error %s needed", errTooShort)
+	if err != errKeyTooShort {
+		t.Errorf("Error %s needed", errKeyTooShort)
 		return
 	}
 	_, err = decrypt(tooShortKey, cipherText)
-	if err != errTooShort {
-		t.Errorf("Error %s needed", errTooShort)
+	if err != errKeyTooShort {
+		t.Errorf("Error %s needed", errKeyTooShort)
 		return
 	}
 
@@ -64,9 +64,9 @@ func TestCoding(t *testing.T) {
 	srcM["foo"] = 123
 	srcM["bar"] = "abc"
 	var dstM M
-	cipherText := encoding(legalKey, srcM)
-	if cipherText == "" {
-		t.Errorf("Empty cipher text")
+	cipherText, err := encoding(legalKey, srcM)
+	if err != nil {
+		t.Error(err)
 		return
 	}
 	if err := decoding(legalKey, cipherText, &dstM); err != nil {
@@ -79,9 +79,9 @@ func TestCoding(t *testing.T) {
 		return
 	}
 
-	cipherText = encoding(tooShortKey, srcM)
-	if cipherText != "" {
-		t.Errorf("Empty string should be return for a short key")
+	cipherText, err = encoding(tooShortKey, srcM)
+	if err != errKeyTooShort {
+		t.Errorf("Error %s needed", errKeyTooShort)
 		return
 	}
 }
