@@ -1,14 +1,14 @@
 package session
 
 import (
-	"testing"
 	"net/http"
 	"strings"
+	"testing"
 )
 
 const (
 	sessionKey = "TEST_SESSION"
-	cookieKey = "1234567890123456"
+	cookieKey  = "1234567890123456"
 )
 
 func init() {
@@ -19,10 +19,10 @@ type testResponse struct {
 	header http.Header
 }
 
-func newTestResponse() *testResponse {return &testResponse{make(http.Header)}}
-func (resp *testResponse) Header() http.Header {return resp.header}
-func (resp *testResponse) Write(data []byte) (n int, err error) {return}
-func (resp *testResponse) WriteHeader(status int) {}
+func newTestResponse() *testResponse                            { return &testResponse{make(http.Header)} }
+func (resp *testResponse) Header() http.Header                  { return resp.header }
+func (resp *testResponse) Write(data []byte) (n int, err error) { return }
+func (resp *testResponse) WriteHeader(status int)               {}
 func splitCookie(cookie string) *http.Cookie {
 	str := strings.Split(cookie, ";")
 	str = strings.SplitN(str[0], "=", 2)

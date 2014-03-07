@@ -58,7 +58,7 @@ func encrypt(key, value []byte) ([]byte, error) {
 }
 
 func decrypt(key, value []byte) ([]byte, error) {
-	if len(key) < aesKeySize - keySize {
+	if len(key) < aesKeySize-keySize {
 		return nil, errKeyTooShort
 	}
 	key = append(key[:aesKeySize-keySize], defaultKey...)
@@ -95,7 +95,7 @@ func decoding(key []byte, src string, dst *M) error {
 	return nil
 }
 
-func encoding(key []byte, src map[string]interface{}) (string, error){
+func encoding(key []byte, src map[string]interface{}) (string, error) {
 	// 1. gob encoding
 	var buf bytes.Buffer
 	g := gob.NewEncoder(&buf)
