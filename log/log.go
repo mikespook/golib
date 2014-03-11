@@ -6,7 +6,6 @@ import (
     "log"
     "fmt"
     "errors"
-    "sync"
     "runtime"
 )
 
@@ -33,36 +32,10 @@ const (
 type Logger struct {
     *log.Logger
     flag int
-    logChan chan *logRecord
-    mutex sync.Mutex
-}
-
-type logRecord struct {
-    Type uint8
-    Message []interface{}
 }
 
 func New(w io.Writer, flag, bufsize int) (l *Logger, err error) {
     l = &Logger{Logger:log.New(w, "", log.LstdFlags), flag:flag}
-    l.logChan = make(chan *logRecord, bufsize)
-    go func() {
-        l.mutex.Lock()
-        defer l.mutex.Unlock()
-        var t string
-        for record := range l.logChan {
-            switch record.Type {
-                case TypeDebug:
-                    t = "[DBG] %s"
-                case TypeMessage:
-                    t = "[MSG] %s"
-                case TypeWarning:
-                    t = "[WRN] %s"
-                case TypeError:
-                    t = "[ERR] %s"
-            }
-            l.Printf(t, record.Message ... )
-        }
-    } ()
     return l, err
 }
 
@@ -88,14 +61,14 @@ func (l *Logger) Error(err error) {
     if l.flag & DisableError == 0 {
         return
     }
-    l.logChan <- &logRecord{Type:TypeError, Message: []interface{}{err}}
+    l.Printf("[ERR] %s", err)
 }
 
 func (l *Logger) Warning(msg ... interface{}) {
     if l.flag & DisableWarning == 0 {
         return
     }
-    l.logChan <- &logRecord{Type:TypeWarning, Message: msg}
+    l.Printf("[WRN] %s", msg ...)
 }
 
 func (l *Logger) Warningf(format string, msg ... interface{}) {
@@ -106,7 +79,7 @@ func (l *Logger) Message(msg ... interface{}) {
     if l.flag & DisableMessage == 0 {
         return
     }
-    l.logChan <- &logRecord{Type:TypeMessage, Message: msg}
+    l.Printf("[MSG] %s", msg ...)
 }
 
 func (l *Logger) Messagef(format string, msg ... interface{}) {
@@ -117,22 +90,11 @@ func (l *Logger) Debug(msg ... interface{}) {
     if l.flag & DisableDebug == 0 {
         return
     }
-    l.logChan <- &logRecord{Type:TypeDebug, Message: msg}
+	l.Printf("[DBG] %s", msg ...)
 }
 
 func (l *Logger) Debugf(format string, msg ... interface{}) {
     l.Debug(fmt.Sprintf(format, msg ...))
-}
-
-func (l *Logger) Close() {
-    close(l.logChan)
-}
-
-// Close the logger and waiting all messages was printed
-func (l *Logger) WaitClosing() {
-    defer l.mutex.Unlock()
-    l.Close()
-    l.mutex.Lock()
 }
 
 var (
@@ -179,14 +141,6 @@ func Debug(msg ... interface{}) {
 
 func Debugf(format string, msg ... interface{}) {
     DefaultLogger.Debugf(format, msg ... )
-}
-
-func Close() {
-    DefaultLogger.Close()
-}
-
-func WaitClosing() {
-    DefaultLogger.WaitClosing()
 }
 
 func Exit(code int) {
