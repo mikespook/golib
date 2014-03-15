@@ -5,18 +5,27 @@ import (
 	"time"
 )
 
+const (
+	CookieDomain   = "domain"
+	CookieExpires  = "expires"
+	CookieHttpOnly = "http-only"
+	CookieMaxAge   = "max-age"
+	CookiePath     = "path"
+	CookieSecure   = "secure"
+)
+
 var optionsDefault = M{
-	"domain":    "",
-	"expires":   time.Now(),
-	"http-only": false,
-	"max-age":   3600,
-	"path":      "/",
-	"secure":    false,
+	CookieDomain:   "",
+	CookieExpires:  time.Now(),
+	CookieHttpOnly: false,
+	CookieMaxAge:   3600,
+	CookiePath:     "/",
+	CookieSecure:   false,
 }
 
 var optionsClean = M{
-	"expires": time.Now(),
-	"max-age": 0,
+	CookieExpires: time.Now(),
+	CookieMaxAge:  0,
 }
 
 type cookieStorage struct {
@@ -25,22 +34,22 @@ type cookieStorage struct {
 }
 
 func fillCookie(options M, cookie *http.Cookie) {
-	if domain, ok := options["domain"]; ok {
+	if domain, ok := options[CookieDomain]; ok {
 		cookie.Domain = domain.(string)
 	}
-	if expires, ok := options["expires"]; ok {
+	if expires, ok := options[CookieExpires]; ok {
 		cookie.Expires = expires.(time.Time)
 	}
-	if httpOnly, ok := options["http-only"]; ok {
+	if httpOnly, ok := options[CookieHttpOnly]; ok {
 		cookie.HttpOnly = httpOnly.(bool)
 	}
-	if maxAge, ok := options["max-age"]; ok {
+	if maxAge, ok := options[CookieMaxAge]; ok {
 		cookie.MaxAge = maxAge.(int)
 	}
-	if path, ok := options["path"]; ok {
+	if path, ok := options[CookiePath]; ok {
 		cookie.Path = path.(string)
 	}
-	if secure, ok := options["secure"]; ok {
+	if secure, ok := options[CookieSecure]; ok {
 		cookie.Secure = secure.(bool)
 	}
 }
@@ -74,6 +83,7 @@ func (storage *cookieStorage) Flush(s *Session) error {
 }
 
 func (storage *cookieStorage) LoadTo(r *http.Request, s *Session) error {
+	s.storage = storage
 	cookie, err := r.Cookie(storage.keyName)
 	if err != nil {
 		s.Init()
@@ -90,6 +100,10 @@ func (storage *cookieStorage) LoadTo(r *http.Request, s *Session) error {
 		return err
 	}
 	return nil
+}
+
+func (storage *cookieStorage) SetOption(key string, value interface{}) {
+	storage.options[key] = value
 }
 
 func CookieStorage(keyName string, options M) Storage {

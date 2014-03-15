@@ -48,6 +48,10 @@ func (s *Session) Flush() error {
 	return s.storage.Flush(s)
 }
 
+func (s *Session) SetOption(key string, value interface{}) {
+	s.storage.SetOption(key, value)
+}
+
 func genKey(size int) []byte {
 	b := make([]byte, size)
 	if _, err := rand.Read(b); err != nil {

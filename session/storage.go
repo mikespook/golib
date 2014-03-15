@@ -19,6 +19,7 @@ type Storage interface {
 	Clean(*Session) error
 	Flush(*Session) error
 	LoadTo(*http.Request, *Session) error
+	SetOption(string, interface{})
 }
 
 const (
