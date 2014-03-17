@@ -44,12 +44,8 @@ func (s *Session) Clean() error {
 	return s.storage.Clean(s)
 }
 
-func (s *Session) Flush() error {
-	return s.storage.Flush(s)
-}
-
-func (s *Session) SetOption(key string, value interface{}) {
-	s.storage.SetOption(key, value)
+func (s *Session) Flush(options M) error {
+	return s.storage.Flush(s, options)
 }
 
 func genKey(size int) []byte {

@@ -66,12 +66,13 @@ func (storage *cookieStorage) Clean(s *Session) error {
 	return nil
 }
 
-func (storage *cookieStorage) Flush(s *Session) error {
+func (storage *cookieStorage) Flush(s *Session, options M) error {
 	key := &http.Cookie{
 		Name:  storage.keyName,
 		Value: s.id,
 	}
 	fillCookie(storage.options, key)
+	fillCookie(options, key)
 	http.SetCookie(s.w, key)
 	v, err := encoding([]byte(s.id), s.data)
 	value := &http.Cookie{
@@ -79,6 +80,7 @@ func (storage *cookieStorage) Flush(s *Session) error {
 		Value: v,
 	}
 	fillCookie(storage.options, value)
+	fillCookie(options, value)
 	http.SetCookie(s.w, value)
 	return err
 }
@@ -101,10 +103,6 @@ func (storage *cookieStorage) LoadTo(r *http.Request, s *Session) error {
 		return err
 	}
 	return nil
-}
-
-func (storage *cookieStorage) SetOption(key string, value interface{}) {
-	storage.options[key] = value
 }
 
 func CookieStorage(keyName string, options M) Storage {

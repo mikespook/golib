@@ -17,9 +17,8 @@ func init() {
 
 type Storage interface {
 	Clean(*Session) error
-	Flush(*Session) error
+	Flush(*Session, M) error
 	LoadTo(*http.Request, *Session) error
-	SetOption(string, interface{})
 }
 
 const (

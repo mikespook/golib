@@ -46,8 +46,7 @@ func TestCookieStorage(t *testing.T) {
 	resp := newTestResponse()
 	s.w = resp
 	s.Set("foo", 123)
-	s.SetOption("max-age", 1234)
-	storage.Flush(s)
+	storage.Flush(s, M{CookieMaxAge:1234})
 	for _, setCookie := range resp.header["Set-Cookie"] {
 		if strings.Index(setCookie, "Max-Age=1234") == -1 {
 			t.Errorf("Options not effective: %s", setCookie)
