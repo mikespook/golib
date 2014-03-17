@@ -16,7 +16,6 @@ const (
 
 var DefaultCookieOptions = M{
 	CookieDomain:   "",
-	CookieExpires:  time.Now(),
 	CookieHttpOnly: false,
 	CookieMaxAge:   3600,
 	CookiePath:     "/",
@@ -37,14 +36,16 @@ func fillCookie(options M, cookie *http.Cookie) {
 	if domain, ok := options[CookieDomain]; ok {
 		cookie.Domain = domain.(string)
 	}
+	if maxAge, ok := options[CookieMaxAge]; ok {
+		maxAge := maxAge.(int)
+		cookie.MaxAge = maxAge
+		cookie.Expires = time.Now().Add(time.Duration(maxAge) * time.Second)
+	}
 	if expires, ok := options[CookieExpires]; ok {
 		cookie.Expires = expires.(time.Time)
 	}
 	if httpOnly, ok := options[CookieHttpOnly]; ok {
 		cookie.HttpOnly = httpOnly.(bool)
-	}
-	if maxAge, ok := options[CookieMaxAge]; ok {
-		cookie.MaxAge = maxAge.(int)
 	}
 	if path, ok := options[CookiePath]; ok {
 		cookie.Path = path.(string)
