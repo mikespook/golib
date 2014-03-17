@@ -14,7 +14,7 @@ const (
 	CookieSecure   = "secure"
 )
 
-var optionsDefault = M{
+var DefaultCookieOptions = M{
 	CookieDomain:   "",
 	CookieExpires:  time.Now(),
 	CookieHttpOnly: false,
@@ -23,7 +23,7 @@ var optionsDefault = M{
 	CookieSecure:   false,
 }
 
-var optionsClean = M{
+var CleanCookieOptions = M{
 	CookieExpires: time.Now(),
 	CookieMaxAge:  0,
 }
@@ -56,10 +56,10 @@ func fillCookie(options M, cookie *http.Cookie) {
 
 func (storage *cookieStorage) Clean(s *Session) error {
 	key := &http.Cookie{Name: storage.keyName}
-	fillCookie(optionsClean, key)
+	fillCookie(CleanCookieOptions, key)
 	http.SetCookie(s.w, key)
 	value := &http.Cookie{Name: s.id}
-	fillCookie(optionsClean, value)
+	fillCookie(CleanCookieOptions, value)
 	http.SetCookie(s.w, value)
 	s.Init()
 	return nil
@@ -108,7 +108,7 @@ func (storage *cookieStorage) SetOption(key string, value interface{}) {
 
 func CookieStorage(keyName string, options M) Storage {
 	if options == nil {
-		options = optionsDefault
+		options = DefaultCookieOptions
 	}
 	return &cookieStorage{keyName, options}
 }
