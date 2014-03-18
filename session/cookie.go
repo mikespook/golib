@@ -55,6 +55,17 @@ func fillCookie(options M, cookie *http.Cookie) {
 	}
 }
 
+func fillOptions(cookie *http.Cookie) M {
+	options := make(M)
+	options[CookieDomain] = cookie.Domain
+	options[CookieMaxAge] = cookie.MaxAge
+	options[CookieExpires] = time.Now().Add(time.Duration(cookie.MaxAge) * time.Second)
+	options[CookieHttpOnly] = cookie.HttpOnly
+	options[CookiePath] = cookie.Path
+	options[CookieSecure] = cookie.Secure
+	return options
+}
+
 func (storage *cookieStorage) Clean(s *Session) error {
 	key := &http.Cookie{Name: storage.keyName}
 	fillCookie(CleanCookieOptions, key)
@@ -103,6 +114,9 @@ func (storage *cookieStorage) LoadTo(r *http.Request, s *Session) error {
 	if err != nil {
 		s.Init()
 		return err
+	}
+	if s.options == nil {
+		s.options = fillOptions(cookie)
 	}
 	if err := decoding([]byte(s.id), cookie.Value, &s.data); err != nil {
 		s.data = make(M)
