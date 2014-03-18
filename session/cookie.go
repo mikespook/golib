@@ -66,21 +66,27 @@ func (storage *cookieStorage) Clean(s *Session) error {
 	return nil
 }
 
-func (storage *cookieStorage) Flush(s *Session, options M) error {
+func (storage *cookieStorage) Flush(s *Session) error {
 	key := &http.Cookie{
 		Name:  storage.keyName,
 		Value: s.id,
 	}
-	fillCookie(storage.options, key)
-	fillCookie(options, key)
+	if s.options == nil {
+		fillCookie(storage.options, key)
+	} else {
+		fillCookie(s.options, key)
+	}
 	http.SetCookie(s.w, key)
 	v, err := encoding([]byte(s.id), s.data)
 	value := &http.Cookie{
 		Name:  s.id,
 		Value: v,
 	}
-	fillCookie(storage.options, value)
-	fillCookie(options, value)
+	if s.options == nil {
+		fillCookie(storage.options, value)
+	} else {
+		fillCookie(s.options, value)
+	}
 	http.SetCookie(s.w, value)
 	return err
 }

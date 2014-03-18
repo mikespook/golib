@@ -15,6 +15,7 @@ type Session struct {
 	id      string
 	storage Storage
 	w       http.ResponseWriter
+	options M
 }
 
 func (s *Session) Id() string {
@@ -44,8 +45,8 @@ func (s *Session) Clean() error {
 	return s.storage.Clean(s)
 }
 
-func (s *Session) Flush(options M) error {
-	return s.storage.Flush(s, options)
+func (s *Session) Flush() error {
+	return s.storage.Flush(s)
 }
 
 func genKey(size int) []byte {
