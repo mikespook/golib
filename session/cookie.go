@@ -82,9 +82,8 @@ func (storage *cookieStorage) Flush(s *Session) error {
 		Name:  storage.keyName,
 		Value: s.id,
 	}
-	if s.options == nil {
-		fillCookie(storage.options, key)
-	} else {
+	fillCookie(storage.options, key)
+	if s.options != nil {
 		fillCookie(s.options, key)
 	}
 	http.SetCookie(s.w, key)
@@ -93,9 +92,8 @@ func (storage *cookieStorage) Flush(s *Session) error {
 		Name:  s.id,
 		Value: v,
 	}
-	if s.options == nil {
-		fillCookie(storage.options, value)
-	} else {
+	fillCookie(storage.options, value)
+	if s.options != nil {
 		fillCookie(s.options, value)
 	}
 	http.SetCookie(s.w, value)
