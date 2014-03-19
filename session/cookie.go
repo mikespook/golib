@@ -29,7 +29,7 @@ var CleanCookieOptions = M{
 
 type cookieStorage struct {
 	keyName string
-	options M
+	options *http.Cookie
 }
 
 func fillCookie(options M, cookie *http.Cookie) {
@@ -66,6 +66,31 @@ func fillOptions(cookie *http.Cookie) M {
 	return options
 }
 
+func mergeOptions(origin M, extend M) M {
+	if origin == nil {
+		return extend
+	}
+	for k, v := range extend {
+		if _, ok := origin[k]; ok {
+			continue
+		}
+		origin[k] = v
+	}
+	return origin
+}
+
+func cloneCookie(cookie *http.Cookie) *http.Cookie {
+	newOne := &http.Cookie{
+		Domain: cookie.Domain,
+		MaxAge: cookie.MaxAge,
+		Expires: cookie.Expires,
+		HttpOnly: cookie.HttpOnly,
+		Path: cookie.Path,
+		Secure: cookie.Secure,
+	}
+	return newOne
+}
+
 func (storage *cookieStorage) Clean(s *Session) error {
 	key := &http.Cookie{Name: storage.keyName}
 	fillCookie(CleanCookieOptions, key)
@@ -78,24 +103,21 @@ func (storage *cookieStorage) Clean(s *Session) error {
 }
 
 func (storage *cookieStorage) Flush(s *Session) error {
-	key := &http.Cookie{
-		Name:  storage.keyName,
-		Value: s.id,
-	}
-	fillCookie(storage.options, key)
+	key := cloneCookie(storage.options)
 	if s.options != nil {
 		fillCookie(s.options, key)
 	}
+	key.Name = storage.keyName
+	key.Value = s.id
 	http.SetCookie(s.w, key)
+
 	v, err := encoding([]byte(s.id), s.data)
-	value := &http.Cookie{
-		Name:  s.id,
-		Value: v,
-	}
-	fillCookie(storage.options, value)
+	value := cloneCookie(storage.options)
 	if s.options != nil {
 		fillCookie(s.options, value)
 	}
+	value.Name = s.id
+	value.Value = v
 	http.SetCookie(s.w, value)
 	return err
 }
@@ -113,9 +135,7 @@ func (storage *cookieStorage) LoadTo(r *http.Request, s *Session) error {
 		s.Init()
 		return err
 	}
-	if s.options == nil {
-		s.options = fillOptions(cookie)
-	}
+	s.options = mergeOptions(s.options, fillOptions(cookie))
 	if err := decoding([]byte(s.id), cookie.Value, &s.data); err != nil {
 		s.data = make(M)
 		return err
@@ -127,5 +147,10 @@ func CookieStorage(keyName string, options M) Storage {
 	if options == nil {
 		options = DefaultCookieOptions
 	}
-	return &cookieStorage{keyName, options}
+	cookie := &http.Cookie{}
+	fillCookie(options, cookie)
+	storage := &cookieStorage{keyName, cookie}
+	storage.options = &http.Cookie{}
+	fillCookie(options, storage.options)
+	return storage
 }
