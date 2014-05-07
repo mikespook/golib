@@ -25,13 +25,20 @@ type ScriptIpt interface {
 
 type IptPool struct {
 	p sync.Pool
+    OnCreate EventFunc
 }
 
-func NewIptPool(create CreateFunc) (pool *IptPool) {
+func NewIptPool(create CreateFunc) *IptPool {
+	iptPool := &IptPool{}
 	f := func() interface{} {
-		return create()
+		ipt := create()
+		if iptPool.OnCreate != nil {
+			iptPool.OnCreate(ipt)
+		}
+		return ipt
 	}
-	return &IptPool{sync.Pool{New: f}}
+	iptPool.p = sync.Pool{New: f}
+	return iptPool
 }
 
 func (pool *IptPool) Get() (ipt ScriptIpt) {
