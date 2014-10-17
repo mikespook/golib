@@ -35,6 +35,7 @@ type Logger struct {
 
 func New(w io.Writer, flag, bufsize int) (l *Logger, err error) {
 	l = &Logger{Logger: log.New(w, "", log.LstdFlags), flag: flag}
+	l.SetFlags(log.LstdFlags | log.Llongfile)
 	return l, err
 }
 
@@ -109,7 +110,6 @@ var (
 
 func init() {
 	DefaultLogger, _ = NewLog("", LogAll, DefaultBufSize)
-	DefaultLogger.SetFlags(log.LstdFlags | log.Llongfile)
 }
 
 func Init(file string, flag int) (err error) {
