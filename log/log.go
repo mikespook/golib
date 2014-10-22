@@ -56,13 +56,13 @@ func NewLog(file string, flag, bufsize int) (l *Logger, err error) {
 func (l *Logger) Output(calldepth int, t int, s string) error {
 	var tstr string
 	switch {
-	case t == 0 && l.flag&DisableDebug != 0:
+	case t == TypeDebug && l.flag&DisableDebug != 0:
 		tstr = "DBG"
-	case t == 1 && l.flag&DisableMessage != 0:
+	case t == TypeMessage && l.flag&DisableMessage != 0:
 		tstr = "MSG"
-	case t == 2 && l.flag&DisableWarning != 0:
+	case t == TypeWarning && l.flag&DisableWarning != 0:
 		tstr = "WRN"
-	case t == 3 && l.flag&DisableError != 0:
+	case t == TypeError && l.flag&DisableError != 0:
 		tstr = "ERR"
 	}
 	if tstr == "" {
