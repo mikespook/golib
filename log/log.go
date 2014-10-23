@@ -84,7 +84,7 @@ func (l *Logger) Warning(msg ...interface{}) {
 }
 
 func (l *Logger) Warningf(format string, msg ...interface{}) {
-	l.Output(4, TypeWarning, fmt.Sprintf(format, msg))
+	l.Output(4, TypeWarning, fmt.Sprintf(format, msg...))
 }
 
 func (l *Logger) Message(msg ...interface{}) {
@@ -92,7 +92,7 @@ func (l *Logger) Message(msg ...interface{}) {
 }
 
 func (l *Logger) Messagef(format string, msg ...interface{}) {
-	l.Output(4, TypeMessage, fmt.Sprintf(format, msg))
+	l.Output(4, TypeMessage, fmt.Sprintf(format, msg...))
 }
 
 func (l *Logger) Debug(msg ...interface{}) {
@@ -100,7 +100,7 @@ func (l *Logger) Debug(msg ...interface{}) {
 }
 
 func (l *Logger) Debugf(format string, msg ...interface{}) {
-	l.Output(4, TypeDebug, fmt.Sprintf(format, msg))
+	l.Output(4, TypeDebug, fmt.Sprintf(format, msg...))
 }
 
 var (
