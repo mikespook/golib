@@ -30,16 +30,16 @@ const (
 
 type Logger struct {
 	*log.Logger
-	flag int
+	flag, depth int
 }
 
-func New(w io.Writer, flag, bufsize int) (l *Logger, err error) {
-	l = &Logger{Logger: log.New(w, "", log.LstdFlags), flag: flag}
+func New(w io.Writer, flag, depth int) (l *Logger, err error) {
+	l = &Logger{Logger: log.New(w, "", log.LstdFlags), flag: flag, depth: depth}
 	l.SetFlags(log.LstdFlags | log.Llongfile)
 	return l, err
 }
 
-func NewLog(file string, flag, bufsize int) (l *Logger, err error) {
+func NewLog(file string, flag, depth int) (l *Logger, err error) {
 	var f *os.File
 	if file != "" {
 		f, err = os.OpenFile(file, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0600)
@@ -50,10 +50,10 @@ func NewLog(file string, flag, bufsize int) (l *Logger, err error) {
 	if f == nil {
 		f = os.Stdout
 	}
-	return New(f, flag, bufsize)
+	return New(f, flag, depth)
 }
 
-func (l *Logger) Output(calldepth int, t int, s string) error {
+func (l *Logger) Output(depth, t int, s string) error {
 	var tstr string
 	switch {
 	case t == TypeDebug && l.flag&DisableDebug != 0:
@@ -68,52 +68,52 @@ func (l *Logger) Output(calldepth int, t int, s string) error {
 	if tstr == "" {
 		return nil
 	}
-	return l.Logger.Output(calldepth, fmt.Sprintf("[%s] %s", tstr, s))
+	return l.Logger.Output(depth, fmt.Sprintf("[%s] %s", tstr, s))
 }
 
 func (l *Logger) Errorf(format string, msg ...interface{}) {
-	l.Output(4, TypeError, fmt.Sprintf(format, msg...))
+	l.Output(l.depth, TypeError, fmt.Sprintf(format, msg...))
 }
 
 func (l *Logger) Error(err error) {
-	l.Output(4, TypeError, err.Error())
+	l.Output(l.depth, TypeError, err.Error())
 }
 
 func (l *Logger) Warning(msg ...interface{}) {
-	l.Output(4, TypeWarning, fmt.Sprint(msg...))
+	l.Output(l.depth, TypeWarning, fmt.Sprint(msg...))
 }
 
 func (l *Logger) Warningf(format string, msg ...interface{}) {
-	l.Output(4, TypeWarning, fmt.Sprintf(format, msg...))
+	l.Output(l.depth, TypeWarning, fmt.Sprintf(format, msg...))
 }
 
 func (l *Logger) Message(msg ...interface{}) {
-	l.Output(4, TypeMessage, fmt.Sprint(msg...))
+	l.Output(l.depth, TypeMessage, fmt.Sprint(msg...))
 }
 
 func (l *Logger) Messagef(format string, msg ...interface{}) {
-	l.Output(4, TypeMessage, fmt.Sprintf(format, msg...))
+	l.Output(l.depth, TypeMessage, fmt.Sprintf(format, msg...))
 }
 
 func (l *Logger) Debug(msg ...interface{}) {
-	l.Output(4, TypeDebug, fmt.Sprint(msg...))
+	l.Output(l.depth, TypeDebug, fmt.Sprint(msg...))
 }
 
 func (l *Logger) Debugf(format string, msg ...interface{}) {
-	l.Output(4, TypeDebug, fmt.Sprintf(format, msg...))
+	l.Output(l.depth, TypeDebug, fmt.Sprintf(format, msg...))
 }
 
 var (
-	DefaultLogger  *Logger
-	DefaultBufSize = 32
+	DefaultLogger *Logger
+	DefaultDepth  = 3
 )
 
 func init() {
-	DefaultLogger, _ = NewLog("", LogAll, DefaultBufSize)
+	DefaultLogger, _ = NewLog("", LogAll, DefaultDepth)
 }
 
-func Init(file string, flag int) (err error) {
-	DefaultLogger, err = NewLog(file, flag, DefaultBufSize)
+func Init(file string, flag, depth int) (err error) {
+	DefaultLogger, err = NewLog(file, flag, depth)
 	return
 }
 
@@ -147,6 +147,14 @@ func Debug(msg ...interface{}) {
 
 func Debugf(format string, msg ...interface{}) {
 	DefaultLogger.Debugf(format, msg...)
+}
+
+func Output(depth, t int, msg ...interface{}) {
+	DefaultLogger.Output(depth, t, fmt.Sprint(msg...))
+}
+
+func Outputf(depth, t int, format string, msg ...interface{}) {
+	DefaultLogger.Output(depth, t, fmt.Sprintf(format, msg...))
 }
 
 func Exit(code int) {
