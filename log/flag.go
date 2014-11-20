@@ -44,7 +44,7 @@ func InitWithFlag() {
 		"('error', 'warning', 'message', 'debug', 'all' and 'none'"+
 		" are combined with '|')")
 
-	if err := Init(LogFile, StrToLevel(LogLevel), DefaultDepth); err != nil {
+	if err := Init(LogFile, StrToLevel(LogLevel), DefaultCallDepth); err != nil {
 		Error(err)
 	}
 }

@@ -104,15 +104,18 @@ func (l *Logger) Debugf(format string, msg ...interface{}) {
 }
 
 var (
-	DefaultLogger *Logger
-	DefaultDepth  = 3
+	DefaultLogger    *Logger
+	DefaultCallDepth = 4
 )
 
 func init() {
-	DefaultLogger, _ = NewLog("", LogAll, DefaultDepth)
+	DefaultLogger, _ = NewLog("", LogAll, DefaultCallDepth)
 }
 
 func Init(file string, flag, depth int) (err error) {
+	if depth == 0 {
+		depth = DefaultCallDepth
+	}
 	DefaultLogger, err = NewLog(file, flag, depth)
 	return
 }
