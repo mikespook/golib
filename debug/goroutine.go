@@ -25,6 +25,7 @@ func FprintGoroutines(w io.Writer, allFrame bool) {
 	}
 }
 
+// stolen from `runtime/pprof`
 func printStackRecord(w io.Writer, index int, stk []uintptr, allFrame bool) {
 	wasPanic := false
 	for i, pc := range stk {
