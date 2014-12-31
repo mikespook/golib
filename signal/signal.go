@@ -3,38 +3,60 @@ package signal
 import (
 	"os"
 	S "os/signal"
+
+	"github.com/mikespook/golib/idgen"
 )
 
 // return true if need to break
 type Callback func() bool
 
-type Handler struct {
-	schan chan os.Signal
-	cb    map[os.Signal]Callback
+type cbHandler struct {
+	Id       interface{}
+	Callback Callback
 }
 
-func NewHandler() (sh *Handler) {
+type Handler struct {
+	schan chan os.Signal
+	cb    map[os.Signal][]cbHandler
+	id    idgen.IdGen
+}
+
+func NewHandler(id idgen.IdGen) (sh *Handler) {
+	if id == nil {
+		id = idgen.NewAutoIncId()
+	}
 	sh = &Handler{
 		schan: make(chan os.Signal),
-		cb:    make(map[os.Signal]Callback, 5),
+		cb:    make(map[os.Signal][]cbHandler, 5),
+		id:    id,
 	}
 	return
 }
 
-func (sh *Handler) Bind(s os.Signal, cb Callback) {
+func (sh *Handler) Bind(s os.Signal, cb Callback) (id interface{}) {
 	S.Notify(sh.schan, s)
-	sh.cb[s] = cb
+	id = sh.id.Id()
+	sh.cb[s] = append(sh.cb[s], cbHandler{id, cb})
+	return
 }
 
-func (sh *Handler) Unbind(s os.Signal) {
-	delete(sh.cb, s)
+func (sh *Handler) Unbind(s os.Signal, id interface{}) bool {
+	for k, v := range sh.cb[s] {
+		if v.Id == id {
+			sh.cb[s] = append(sh.cb[s][:k], sh.cb[s][k+1:]...)
+			return true
+		}
+	}
+	return false
 }
 
 func (sh *Handler) Loop() os.Signal {
 	for s := range sh.schan {
-		if f, ok := sh.cb[s]; ok && f != nil {
-			if f() {
-				return s
+		if cbs, ok := sh.cb[s]; ok && cbs != nil {
+			for _, v := range cbs {
+				if v.Callback() {
+					return s
+				}
 			}
 		}
 	}
@@ -47,15 +69,15 @@ func (sh *Handler) Close() {
 }
 
 var (
-	DefaultHandler = NewHandler()
+	DefaultHandler = NewHandler(nil)
 )
 
-func Bind(s os.Signal, cb Callback) {
-	DefaultHandler.Bind(s, cb)
+func Bind(s os.Signal, cb Callback) interface{} {
+	return DefaultHandler.Bind(s, cb)
 }
 
-func Unbind(s os.Signal) {
-	DefaultHandler.Unbind(s)
+func Unbind(s os.Signal, id interface{}) bool {
+	return DefaultHandler.Unbind(s, id)
 }
 
 func Loop() os.Signal {
