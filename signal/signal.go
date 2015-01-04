@@ -3,44 +3,62 @@ package signal
 import (
 	"os"
 	S "os/signal"
+	"syscall"
 
 	"github.com/mikespook/golib/idgen"
 )
 
-// return true if need to break
-type Callback func() bool
+const (
+	Break = iota + 1
+	BreakExit
+	Continue
+	ContinueExit
+)
 
-type cbHandler struct {
+// Returns Break, BreakExit, Continue and ContinueExit
+// for different purposes
+type Callback func() uint
+
+type handler struct {
+	Signal   os.Signal
 	Id       interface{}
-	Callback Callback
+	callback Callback
+	sh       *handlers
 }
 
-type Handler struct {
+func (h *handler) Unbind() bool {
+	return h.sh.Unbind(h.Signal, h.Id)
+}
+
+type handlers struct {
 	schan chan os.Signal
-	cb    map[os.Signal][]cbHandler
+	cb    map[os.Signal][]*handler
 	id    idgen.IdGen
 }
 
-func NewHandler(id idgen.IdGen) (sh *Handler) {
+func New(id idgen.IdGen) (sh *handlers) {
 	if id == nil {
-		id = idgen.NewAutoIncId()
+		id = idgen.NewObjectId()
 	}
-	sh = &Handler{
+	sh = &handlers{
 		schan: make(chan os.Signal),
-		cb:    make(map[os.Signal][]cbHandler, 5),
+		cb:    make(map[os.Signal][]*handler),
 		id:    id,
 	}
 	return
 }
 
-func (sh *Handler) Bind(s os.Signal, cb Callback) (id interface{}) {
+func (sh *handlers) Bind(s os.Signal, cb Callback) (h *handler) {
+	if s == syscall.SIGKILL {
+		panic("Can not handle `SIGKILL`.")
+	}
 	S.Notify(sh.schan, s)
-	id = sh.id.Id()
-	sh.cb[s] = append(sh.cb[s], cbHandler{id, cb})
+	h = &handler{s, sh.id.Id(), cb, sh}
+	sh.cb[s] = append(sh.cb[s], h)
 	return
 }
 
-func (sh *Handler) Unbind(s os.Signal, id interface{}) bool {
+func (sh *handlers) Unbind(s os.Signal, id interface{}) bool {
 	for k, v := range sh.cb[s] {
 		if v.Id == id {
 			sh.cb[s] = append(sh.cb[s][:k], sh.cb[s][k+1:]...)
@@ -50,38 +68,52 @@ func (sh *Handler) Unbind(s os.Signal, id interface{}) bool {
 	return false
 }
 
-func (sh *Handler) Loop() os.Signal {
+func (sh *handlers) Loop() os.Signal {
 	for s := range sh.schan {
 		if cbs, ok := sh.cb[s]; ok && cbs != nil {
+			var exit bool
+		Loop:
 			for _, v := range cbs {
-				if v.Callback() {
-					return s
+				switch v.callback() {
+				case Break:
+					break Loop
+				case Continue:
+					continue Loop
+				case BreakExit:
+					exit = true
+					break Loop
+				case ContinueExit:
+					exit = true
+					continue Loop
 				}
+			}
+			if exit {
+				return s
 			}
 		}
 	}
 	return nil
 }
 
-func (sh *Handler) Close() {
+func (sh *handlers) Close() {
 	S.Stop(sh.schan)
 	close(sh.schan)
 }
 
 var (
-	DefaultHandler = NewHandler(nil)
+	Default = New(nil)
 )
 
-func Bind(s os.Signal, cb Callback) interface{} {
-	return DefaultHandler.Bind(s, cb)
+func Bind(s os.Signal, cb Callback) *handler {
+	return Default.Bind(s, cb)
 }
 
 func Unbind(s os.Signal, id interface{}) bool {
-	return DefaultHandler.Unbind(s, id)
+	return Default.Unbind(s, id)
 }
 
 func Loop() os.Signal {
-	return DefaultHandler.Loop()
+	return Default.Loop()
 }
 
 func Send(pid int, signal os.Signal) error {
@@ -96,5 +128,5 @@ func Send(pid int, signal os.Signal) error {
 }
 
 func Close() {
-	DefaultHandler.Close()
+	Default.Close()
 }
