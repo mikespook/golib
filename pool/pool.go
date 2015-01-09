@@ -6,13 +6,14 @@ import (
 )
 
 type Pool struct {
+	New   func() interface{}
+	Close func(interface{}) error
+
 	sync.Mutex
 	data *list.List
 
-	fast  chan interface{}
-	New   func() interface{}
-	Close func(interface{}) error
-	max   int
+	fast chan interface{}
+	max  int
 }
 
 func New() *Pool {
@@ -38,6 +39,10 @@ func (p *Pool) MaxLen(n int) {
 
 func (p *Pool) Len() int {
 	return p.data.Len()
+}
+
+func (p *Pool) Clean() {
+	p.data.Init()
 }
 
 func (p *Pool) Get() (item interface{}) {
