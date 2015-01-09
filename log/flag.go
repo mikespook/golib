@@ -19,9 +19,6 @@ func StrToLevel(str string) int {
 	levels := strings.SplitN(str, "|", -1)
 	for _, v := range levels {
 		switch v {
-		case "none":
-			level = level | LogNone
-			break
 		case "error":
 			level = level | LogError
 		case "warning":
@@ -32,7 +29,10 @@ func StrToLevel(str string) int {
 			level = level | LogDebug
 		case "all":
 			level = LogAll
+		case "none":
+			fallthrough
 		default:
+			level = level | LogNone
 		}
 	}
 	return level
