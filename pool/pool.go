@@ -15,7 +15,7 @@ type Pool struct {
 	max   int
 }
 
-func New(n int) *Pool {
+func New() *Pool {
 	p := &Pool{
 		data: list.New(),
 		fast: make(chan interface{}),
