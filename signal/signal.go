@@ -68,7 +68,7 @@ func (sh *handlers) Unbind(s os.Signal, id interface{}) bool {
 	return false
 }
 
-func (sh *handlers) Loop() os.Signal {
+func (sh *handlers) Wait() os.Signal {
 	for s := range sh.schan {
 		if cbs, ok := sh.cb[s]; ok && cbs != nil {
 			var exit bool
@@ -112,8 +112,8 @@ func Unbind(s os.Signal, id interface{}) bool {
 	return Default.Unbind(s, id)
 }
 
-func Loop() os.Signal {
-	return Default.Loop()
+func Wait() os.Signal {
+	return Default.Wait()
 }
 
 func Send(pid int, signal os.Signal) error {
