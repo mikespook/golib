@@ -6,13 +6,12 @@ import (
 )
 
 const (
-	poolSize = 4
 	itemsNum = 10
 	maxNum   = 4
 )
 
 func TestPool(t *testing.T) {
-	p := New(poolSize)
+	p := New()
 	if p.Get() != nil {
 		t.Error("Should be nil")
 		t.Fail()
