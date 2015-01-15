@@ -14,7 +14,7 @@ func TestSignalHandler(t *testing.T) {
 			t.Error(err)
 		}
 	}()
-	s := Loop()
+	s := Wait()
 	t.Log(s)
 }
 
@@ -32,6 +32,6 @@ func TestKillHandler(t *testing.T) {
 			t.Error(err)
 		}
 	}()
-	s := Loop()
+	s := Wait()
 	t.Log(s)
 }
