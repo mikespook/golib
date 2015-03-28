@@ -5,9 +5,8 @@ Signal
 
 Example
 -------
-
 ```go
-package main
+package signal_test
 
 import (
 	"fmt"
@@ -56,7 +55,7 @@ func main() {
 	}()
 
 	// Block here
-	s := signal.Loop()
+	s := signal.Wait()
 	fmt.Printf("Exit by signal: %s\n", s)
 }
 ```
