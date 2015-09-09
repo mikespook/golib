@@ -21,11 +21,12 @@ type ScriptIpt interface {
 	Init(path string) error
 	Final() error
 	Bind(name string, item interface{}) error
+	State() interface{}
 }
 
 type IptPool struct {
-	p sync.Pool
-    OnCreate EventFunc
+	p        sync.Pool
+	OnCreate EventFunc
 }
 
 func NewIptPool(create CreateFunc) *IptPool {
