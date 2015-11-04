@@ -6,34 +6,34 @@
 package idgen
 
 import (
-    "labix.org/v2/mgo/bson"
-    "github.com/mikespook/golib/autoinc"
+	"github.com/mikespook/golib/autoinc"
+	"gopkg.in/mgo.v2/bson"
 )
 
 type IdGen interface {
-    Id() interface{}
+	Id() interface{}
 }
 
 // ObjectId
-type objectId struct {}
+type objectId struct{}
 
 func (id *objectId) Id() interface{} {
-    return bson.NewObjectId().Hex()
+	return bson.NewObjectId().Hex()
 }
 
 func NewObjectId() *objectId {
-    return &objectId{}
+	return &objectId{}
 }
 
 // AutoIncId
 type autoincId struct {
-    *autoinc.AutoInc
+	*autoinc.AutoInc
 }
 
 func (id *autoincId) Id() interface{} {
-    return id.AutoInc.Id()
+	return id.AutoInc.Id()
 }
 
 func NewAutoIncId() *autoincId {
-    return &autoincId{autoinc.New(1, 1)}
+	return &autoincId{autoinc.New(1, 1)}
 }
